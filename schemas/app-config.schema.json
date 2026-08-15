@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["name", "nameJa", "slug", "version", "build"],
+  "properties": {
+    "name": { "type": "string" },
+    "nameJa": { "type": "string" },
+    "slug": { "type": "string" },
+    "version": { "type": "string" },
+    "defaultLanguage": { "enum": ["auto", "ja", "en"] },
+    "build": {
+      "type": "object",
+      "required": ["output", "blockRuntimeNetwork"],
+      "properties": {
+        "output": { "type": "string" },
+        "blockRuntimeNetwork": { "type": "boolean" }
+      }
+    }
+  }
+}

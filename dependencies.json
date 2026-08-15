@@ -1,0 +1,20 @@
+{
+  "$schema": "./schemas/dependencies.schema.json",
+  "dependencies": [
+    {
+      "id": "jsqr",
+      "package": "jsqr",
+      "version": "1.4.0",
+      "license": "Apache-2.0",
+      "homepage": "https://github.com/cozmo/jsQR",
+      "assets": [
+        {
+          "key": "main",
+          "path": "dist/jsQR.js",
+          "mime": "text/javascript",
+          "stripSourceMapComment": true
+        }
+      ]
+    }
+  ]
+}

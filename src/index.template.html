@@ -1,0 +1,1656 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f5f5f2">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: blob:; media-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>QR Reader</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='15' fill='%2316624f'/%3E%3Cg fill='none' stroke='white' stroke-width='5'%3E%3Cpath d='M13 13h15v15H13zM36 13h15v15H36zM13 36h15v15H13z'/%3E%3Cpath d='M37 37h5v5h-5zM46 36h5v9h-5zM36 47h10v4H36zM49 49h2v2h-2z'/%3E%3C/g%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f5f2;
+      --surface: #ffffff;
+      --surface-muted: #f0f0ed;
+      --surface-hover: #e9e9e5;
+      --text: #20211f;
+      --muted: #666963;
+      --line: #dadbd6;
+      --line-strong: #bfc1ba;
+      --accent: #16624f;
+      --accent-hover: #0e503f;
+      --accent-soft: #e1f0ea;
+      --danger: #b3261e;
+      --focus: #4d8bc7;
+      --camera-surface: #0c0f0e;
+      --camera-ui: rgba(10, 13, 12, .62);
+      --camera-ui-strong: rgba(10, 13, 12, .78);
+      --camera-line: rgba(255, 255, 255, .28);
+      --shadow-sm: 0 1px 2px rgba(25, 28, 24, .08), 0 1px 6px rgba(25, 28, 24, .04);
+      --shadow-md: 0 12px 34px rgba(25, 28, 24, .16);
+      --radius: 14px;
+      --header-height: 66px;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--bg); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", "Yu Gothic UI", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible, summary:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus) 56%, transparent);
+      outline-offset: 2px;
+    }
+    button { -webkit-tap-highlight-color: transparent; }
+    .hidden { display: none !important; }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      min-height: var(--header-height);
+      border-bottom: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      backdrop-filter: blur(16px) saturate(1.2);
+    }
+    .header-inner {
+      width: min(1180px, 100%);
+      min-height: var(--header-height);
+      margin: 0 auto;
+      padding: 10px clamp(14px, 2.8vw, 30px);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 auto;
+      border-radius: 11px;
+      background: var(--accent);
+      color: #fff;
+      box-shadow: var(--shadow-sm);
+    }
+    .brand-mark svg { width: 22px; height: 22px; display: block; }
+    .brand-copy { min-width: 0; }
+    .brand-name { margin: 0; font-size: 17px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .version-badge {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 7px;
+      padding: 1px 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: var(--surface-muted);
+      font-size: 10px;
+      font-weight: 650;
+      vertical-align: 2px;
+    }
+    .brand-meta { margin: 2px 0 0; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .header-actions { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+    .language-button, .header-icon-button {
+      padding: 5px 1px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color .16s ease, opacity .16s ease;
+    }
+    .language-button { font-size: 12px; font-weight: 750; letter-spacing: .02em; }
+    .header-icon-button { display: inline-grid; place-items: center; }
+    .header-icon-button svg { width: 20px; height: 20px; display: block; }
+    .language-button:hover, .header-icon-button:hover { color: var(--text); }
+    .language-button:active, .header-icon-button:active { opacity: .62; }
+
+    .main {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 22px clamp(14px, 2.8vw, 30px) 48px;
+    }
+    .page-intro { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 0 2px 18px; }
+    .page-intro h2 { margin: 0; font-size: clamp(21px, 3vw, 26px); line-height: 1.3; letter-spacing: -.025em; }
+    .page-intro p { margin: 5px 0 0; max-width: 760px; color: var(--muted); font-size: 13px; }
+    .local-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      flex: 0 0 auto;
+      margin-top: 3px;
+      padding: 7px 10px;
+      border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+      border-radius: 999px;
+      color: var(--accent);
+      background: var(--accent-soft);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .local-badge svg { width: 15px; height: 15px; }
+
+    .workspace-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(300px, .75fr); gap: 16px; align-items: start; }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+    .panel-head h2 { margin: 0; font-size: 17px; letter-spacing: -.02em; }
+    .panel-head p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+    .subtle-button {
+      min-height: 34px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--surface);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .subtle-button:hover { border-color: var(--line-strong); background: var(--surface-hover); color: var(--text); }
+    .subtle-button.danger { color: var(--danger); }
+
+    .camera-stage {
+      position: relative;
+      isolation: isolate;
+      width: 100%;
+      height: min(690px, calc(100vh - 165px));
+      min-height: 500px;
+      overflow: hidden;
+      background: var(--camera-surface);
+      color: #fff;
+      touch-action: none;
+      user-select: none;
+    }
+    .camera-stage video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(var(--digital-zoom, 1));
+      transform-origin: center;
+      transition: transform .08s linear;
+      background: #0b0d0c;
+    }
+    .camera-stage::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: linear-gradient(to bottom, rgba(0,0,0,.38), transparent 17%, transparent 68%, rgba(0,0,0,.48));
+    }
+    .mobile-camera-top {
+      position: absolute;
+      z-index: 10;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: calc(env(safe-area-inset-top) + 12px) 16px 10px;
+      pointer-events: none;
+    }
+    .mobile-camera-title { font-size: 16px; font-weight: 760; letter-spacing: -.01em; text-shadow: 0 1px 12px rgba(0,0,0,.55); }
+    .mobile-camera-actions { display: flex; align-items: center; gap: 16px; pointer-events: auto; }
+    .camera-top-button {
+      border: 0;
+      padding: 4px 1px;
+      background: transparent;
+      color: #fff;
+      font-weight: 760;
+      cursor: pointer;
+      filter: drop-shadow(0 1px 5px rgba(0,0,0,.45));
+    }
+    .camera-top-button svg { width: 22px; height: 22px; display: block; }
+    .camera-language { font-size: 12px; }
+
+    .scan-frame {
+      position: absolute;
+      z-index: 4;
+      left: 50%;
+      top: 45%;
+      width: min(52%, 360px);
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 20px;
+      pointer-events: none;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, .10);
+      transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+    }
+    .scan-frame.detected { border-color: rgba(146, 245, 193, .72); box-shadow: 0 0 0 9999px rgba(0,0,0,.10), 0 0 0 2px rgba(146,245,193,.35); transform: translate(-50%, -50%) scale(1.015); }
+    .corner { position: absolute; width: 34px; height: 34px; border-color: #fff; border-style: solid; border-width: 0; filter: drop-shadow(0 1px 4px rgba(0,0,0,.45)); }
+    .corner.tl { left: -2px; top: -2px; border-left-width: 4px; border-top-width: 4px; border-top-left-radius: 12px; }
+    .corner.tr { right: -2px; top: -2px; border-right-width: 4px; border-top-width: 4px; border-top-right-radius: 12px; }
+    .corner.bl { left: -2px; bottom: -2px; border-left-width: 4px; border-bottom-width: 4px; border-bottom-left-radius: 12px; }
+    .corner.br { right: -2px; bottom: -2px; border-right-width: 4px; border-bottom-width: 4px; border-bottom-right-radius: 12px; }
+
+    .camera-status {
+      position: absolute;
+      z-index: 9;
+      left: 50%;
+      top: 18px;
+      max-width: calc(100% - 36px);
+      transform: translateX(-50%);
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 999px;
+      background: var(--camera-ui);
+      backdrop-filter: blur(10px);
+      color: rgba(255,255,255,.92);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: opacity .2s ease;
+    }
+    .camera-status.quiet { opacity: 0; }
+
+    .camera-error {
+      position: absolute;
+      inset: 0;
+      z-index: 7;
+      display: none;
+      place-items: center;
+      padding: 28px;
+      background: radial-gradient(circle at 50% 34%, rgba(255,255,255,.08), transparent 42%), #101311;
+      text-align: center;
+    }
+    .camera-error.show { display: grid; }
+    .camera-error-card { max-width: 390px; }
+    .camera-error-card svg { width: 42px; height: 42px; opacity: .9; }
+    .camera-error-card h3 { margin: 14px 0 7px; font-size: 18px; }
+    .camera-error-card p { margin: 0 0 18px; color: rgba(255,255,255,.67); font-size: 13px; }
+    .camera-error-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; }
+    .camera-error-actions button {
+      min-height: 42px;
+      padding: 8px 14px;
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 11px;
+      background: rgba(255,255,255,.10);
+      color: #fff;
+      font-weight: 750;
+      cursor: pointer;
+    }
+    .camera-error-actions button.primary { background: #fff; color: #111; border-color: #fff; }
+
+    .gesture-hint {
+      position: absolute;
+      z-index: 9;
+      left: 50%;
+      bottom: 153px;
+      transform: translate(-50%, 8px);
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: var(--camera-ui);
+      color: rgba(255,255,255,.88);
+      font-size: 11px;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .22s ease, transform .22s ease;
+    }
+    .gesture-hint.show { opacity: 1; transform: translate(-50%, 0); }
+
+    .zoom-bar {
+      position: absolute;
+      z-index: 9;
+      left: 50%;
+      bottom: 92px;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: min(420px, calc(100% - 34px));
+      min-height: 44px;
+      padding: 7px 12px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      background: var(--camera-ui);
+      backdrop-filter: blur(13px) saturate(1.1);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .zoom-bar.disabled { opacity: .48; }
+    .zoom-label { flex: 0 0 46px; text-align: center; font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .zoom-reset {
+      flex: 0 0 auto;
+      min-width: 38px;
+      height: 30px;
+      padding: 0 7px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .zoom-range {
+      width: 100%;
+      height: 26px;
+      margin: 0;
+      accent-color: #fff;
+      cursor: pointer;
+    }
+
+    .camera-dock {
+      position: absolute;
+      z-index: 10;
+      left: 50%;
+      bottom: 19px;
+      transform: translateX(-50%);
+      display: grid;
+      grid-template-columns: repeat(4, minmax(58px, 1fr));
+      gap: 5px;
+      width: min(430px, calc(100% - 30px));
+      padding: 7px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 20px;
+      background: var(--camera-ui-strong);
+      backdrop-filter: blur(16px) saturate(1.15);
+      box-shadow: 0 10px 32px rgba(0,0,0,.2);
+    }
+    .camera-action {
+      position: relative;
+      min-height: 56px;
+      border: 0;
+      border-radius: 14px;
+      background: transparent;
+      color: rgba(255,255,255,.93);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      align-content: center;
+      gap: 3px;
+    }
+    .camera-action:hover { background: rgba(255,255,255,.08); }
+    .camera-action:active { background: rgba(255,255,255,.13); transform: scale(.97); }
+    .camera-action[disabled] { opacity: .35; cursor: default; }
+    .camera-action[disabled]:hover { background: transparent; }
+    .camera-action.active { background: rgba(255,255,255,.14); }
+    .camera-action svg { width: 23px; height: 23px; display: block; }
+    .camera-action span { font-size: 10px; font-weight: 720; }
+    .history-badge {
+      position: absolute;
+      top: 5px;
+      right: 11px;
+      display: none;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: #fff;
+      color: #171a18;
+      font-size: 10px !important;
+      line-height: 18px;
+      font-weight: 850 !important;
+    }
+    .history-badge.show { display: block; }
+
+    .history-panel { min-height: 520px; }
+    .history-tools { display: flex; gap: 8px; padding: 12px; border-bottom: 1px solid var(--line); }
+    .history-search {
+      min-width: 0;
+      flex: 1;
+      min-height: 38px;
+      padding: 8px 11px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fbfbf9;
+      color: var(--text);
+    }
+    .history-list { max-height: 610px; overflow: auto; padding: 6px 0 12px; }
+    .history-empty { padding: 42px 24px; color: var(--muted); text-align: center; font-size: 13px; }
+    .history-group-title { padding: 12px 16px 5px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .02em; }
+    .history-item {
+      width: 100%;
+      padding: 12px 14px;
+      border: 0;
+      border-top: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+    }
+    .history-item:hover { background: var(--surface-hover); }
+    .history-item-main { min-width: 0; }
+    .history-item-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+    .history-item-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--surface-muted);
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .history-item-type svg { width: 12px; height: 12px; flex: 0 0 auto; }
+    .history-item-time {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+    .history-item-value {
+      margin-top: 7px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      font-size: 12px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+    .history-item-actions {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 7px;
+      margin-top: 10px;
+    }
+    .history-action {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 34px;
+      padding: 6px 8px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 760;
+      cursor: pointer;
+    }
+    .history-action:hover { border-color: var(--line-strong); background: var(--surface-hover); color: var(--text); }
+    .history-action.danger { color: var(--danger); }
+    .history-action svg { width: 14px; height: 14px; flex: 0 0 auto; }
+
+    dialog {
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow-md);
+    }
+    dialog::backdrop { background: rgba(15,17,14,.54); backdrop-filter: blur(4px); }
+    .dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px; border-bottom: 1px solid var(--line); }
+    .dialog-header h2 { margin: 0; font-size: 17px; }
+    .dialog-close {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border: 0;
+      background: transparent;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .dialog-close:hover { background: var(--surface-hover); }
+    .dialog-close svg { width: 19px; height: 19px; }
+    .help-dialog { width: min(640px, calc(100% - 28px)); max-height: min(780px, calc(100dvh - 28px)); overflow: hidden; }
+    .dialog-body { padding: 20px 20px 28px; overflow: auto; max-height: calc(100dvh - 100px); }
+    .dialog-body h3 { margin: 24px 0 7px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 14px; }
+    .dialog-body h3:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+    .dialog-body p, .dialog-body li { color: var(--muted); font-size: 13px; line-height: 1.72; }
+    .dialog-note { padding: 11px 12px; border-radius: 10px; background: var(--surface-muted); }
+
+    .history-dialog { width: min(680px, calc(100% - 24px)); max-height: min(760px, calc(100dvh - 24px)); overflow: hidden; }
+    .history-dialog-body { overflow: hidden; }
+    .history-dialog .history-list { max-height: calc(100dvh - 182px); }
+
+    .result-dialog { width: min(560px, calc(100% - 24px)); max-height: min(720px, calc(100dvh - 24px)); overflow: hidden; }
+    .result-body { padding: 19px; overflow: auto; max-height: calc(100dvh - 86px); }
+    .result-kicker { display: flex; align-items: center; gap: 8px; color: var(--accent); font-size: 11px; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
+    .result-kicker svg { width: 17px; height: 17px; }
+    .result-value {
+      margin-top: 11px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfbf9;
+      font-size: 14px;
+      line-height: 1.65;
+      overflow-wrap: anywhere;
+      user-select: text;
+    }
+    .result-detail { margin-top: 10px; color: var(--muted); font-size: 12px; white-space: pre-line; }
+    .result-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+    .result-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 44px;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--surface);
+      font-weight: 760;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .result-button svg { width: 15px; height: 15px; flex: 0 0 auto; }
+    .result-button:hover { border-color: var(--line-strong); background: var(--surface-hover); }
+    .result-button.primary { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .result-button.primary:hover { border-color: var(--accent-hover); background: var(--accent-hover); }
+    .result-button.wide { grid-column: 1 / -1; }
+
+    .confirm-dialog { width: min(420px, calc(100% - 24px)); max-width: 100%; overflow: hidden; }
+    .confirm-dialog .dialog-header { padding-bottom: 13px; }
+    .confirm-body { padding: 18px; }
+    .confirm-message { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .confirm-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 18px; }
+
+    .toast {
+      position: fixed;
+      z-index: 90;
+      right: 18px;
+      bottom: 18px;
+      max-width: min(360px, calc(100vw - 36px));
+      padding: 11px 14px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow-md);
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    footer { width: min(1180px, 100%); margin: 0 auto; padding: 0 clamp(14px, 2.8vw, 30px) 34px; color: var(--muted); font-size: 12px; }
+
+    @media (max-width: 760px) {
+      html, body { width: 100%; height: 100%; overflow: hidden; background: #0b0e0d; overscroll-behavior: none; }
+      .app-header, .page-intro, .history-panel, footer { display: none; }
+      .main { width: 100%; height: 100%; margin: 0; padding: 0; }
+      .workspace-grid { display: block; width: 100%; height: 100%; }
+      .scanner-panel { width: 100%; height: 100%; border: 0; border-radius: 0; box-shadow: none; }
+      .scanner-panel > .panel-head { display: none; }
+      .camera-stage {
+        width: 100%;
+        height: 100svh;
+        height: 100dvh;
+        min-height: 100svh;
+        min-height: 100dvh;
+        padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+        border-radius: 0;
+      }
+      .mobile-camera-top { display: flex; }
+      .camera-status { top: calc(env(safe-area-inset-top) + 58px); font-size: 11px; }
+      .scan-frame { top: 43%; width: min(68vw, 330px); border-radius: 18px; }
+      .corner { width: 31px; height: 31px; }
+      .zoom-bar { bottom: calc(env(safe-area-inset-bottom) + 101px); width: calc(100% - 32px); }
+      .camera-dock { bottom: calc(env(safe-area-inset-bottom) + 18px); width: calc(100% - 28px); }
+      .gesture-hint { bottom: calc(env(safe-area-inset-bottom) + 158px); }
+      .camera-error { padding: calc(env(safe-area-inset-top) + 70px) 24px calc(env(safe-area-inset-bottom) + 116px); }
+      .result-dialog, .history-dialog {
+        width: 100%;
+        max-width: none;
+        max-height: min(78dvh, 720px);
+        margin: auto 0 0;
+        border-width: 1px 0 0;
+        border-radius: 22px 22px 0 0;
+      }
+      .result-dialog::backdrop, .history-dialog::backdrop, .confirm-dialog::backdrop { background: rgba(0,0,0,.42); backdrop-filter: blur(2px); }
+      .result-body { padding: 18px 17px calc(env(safe-area-inset-bottom) + 19px); }
+      .history-dialog .history-list { max-height: calc(78dvh - 154px); }
+      .history-dialog-body { padding-bottom: env(safe-area-inset-bottom); }
+      .confirm-dialog {
+        width: 100%;
+        max-width: none;
+        margin: auto 0 0;
+        border-width: 1px 0 0;
+        border-radius: 22px 22px 0 0;
+      }
+      .confirm-dialog .dialog-header { padding: 14px 18px 12px; }
+      .confirm-body { padding: 12px 18px calc(env(safe-area-inset-bottom) + 18px); }
+      .confirm-message { font-size: 14px; line-height: 1.75; }
+      .confirm-actions { grid-template-columns: 1fr; gap: 10px; margin-top: 16px; }
+      .confirm-actions .result-button { min-height: 48px; font-size: 14px; }
+      .toast {
+        right: 50%;
+        bottom: calc(env(safe-area-inset-bottom) + 178px);
+        transform: translate(50%, 12px);
+        border-color: rgba(255,255,255,.15);
+        background: rgba(15,18,16,.88);
+        color: #fff;
+        backdrop-filter: blur(10px);
+      }
+      .toast.show { transform: translate(50%, 0); }
+    }
+
+    @media (max-width: 390px) {
+      .camera-dock { grid-template-columns: repeat(4, 1fr); gap: 1px; padding: 5px; }
+      .camera-action { min-height: 52px; }
+      .camera-action span { font-size: 9px; }
+      .zoom-bar { gap: 6px; padding-left: 9px; padding-right: 9px; }
+      .result-actions { grid-template-columns: repeat(2, 1fr); }
+      .result-button.wide { grid-column: 1 / -1; }
+      .history-item-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .history-action { min-height: 36px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3z"/><path d="M14 14h3v3h-3zM19 14h2v5h-2zM14 19h5v2h-5zM20 20h1v1h-1z"/></svg>
+        </div>
+        <div class="brand-copy">
+          <h1 class="brand-name"><span id="brandName">QRコードリーダー</span><span class="version-badge" id="versionBadge">v1.0</span></h1>
+          <p class="brand-meta" data-i18n="brandMeta">単一HTML・端末内処理・履歴保存</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="language-button" id="languageButton" type="button">EN</button>
+        <button class="header-icon-button" id="helpButton" type="button" aria-label="使い方と注意事項" data-i18n-aria-label="helpTitle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.3 2c-1 .7-1.9 1.1-1.9 2.5M12 17h.01"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="page-intro">
+      <div>
+        <h2 data-i18n="introTitle">QRコードをすぐ読む</h2>
+        <p data-i18n="introLead">カメラでも画像でも読み取り。結果と履歴はこのブラウザー内だけで扱います。</p>
+      </div>
+      <div class="local-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 11V8a4 4 0 0 1 8 0v3"/><rect x="5" y="11" width="14" height="9" rx="2"/></svg>
+        <span data-i18n="localBadge">実行時通信なし</span>
+      </div>
+    </section>
+
+    <div class="workspace-grid">
+      <section class="panel scanner-panel">
+        <div class="panel-head">
+          <div>
+            <h2 data-i18n="scannerTitle">スキャン</h2>
+            <p data-i18n="scannerLead">QRコードを枠に入れると自動で読み取ります。</p>
+          </div>
+        </div>
+        <div class="camera-stage" id="cameraStage" style="--digital-zoom:1">
+          <video id="video" autoplay muted playsinline aria-label="カメラプレビュー"></video>
+          <canvas id="scanCanvas" class="hidden"></canvas>
+
+          <div class="mobile-camera-top">
+            <div class="mobile-camera-title" id="mobileTitle">QRコードリーダー</div>
+            <div class="mobile-camera-actions">
+              <button class="camera-top-button camera-language interactive" id="mobileLanguageButton" type="button">EN</button>
+              <button class="camera-top-button interactive" id="mobileHelpButton" type="button" aria-label="使い方と注意事項" data-i18n-aria-label="helpTitle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.3 2c-1 .7-1.9 1.1-1.9 2.5M12 17h.01"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="camera-status" id="cameraStatus" role="status" aria-live="polite" data-i18n="cameraStarting">カメラを起動しています…</div>
+
+          <div class="scan-frame" id="scanFrame" aria-hidden="true">
+            <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+          </div>
+
+          <div class="camera-error" id="cameraError">
+            <div class="camera-error-card">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 7h4l2-2h6l2 2h4v12H3z"/><circle cx="12" cy="13" r="3.5"/><path d="M4 4l16 16"/></svg>
+              <h3 data-i18n="cameraUnavailableTitle">カメラを使用できません</h3>
+              <p id="cameraErrorText" data-i18n="cameraUnavailableBody">カメラの権限を確認するか、画像から読み込んでください。</p>
+              <div class="camera-error-actions">
+                <button class="primary interactive" id="retryCameraButton" type="button" data-i18n="retryCamera">再試行</button>
+                <button class="interactive" id="errorImageButton" type="button" data-i18n="fromImage">画像から</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="gesture-hint" id="gestureHint" data-i18n="gestureHint">画面を上下にスワイプしてズーム</div>
+
+          <div class="zoom-bar" id="zoomBar">
+            <button class="zoom-reset interactive" id="zoomResetButton" type="button" aria-label="ズームを1倍に戻す">1×</button>
+            <input class="zoom-range interactive" id="zoomRange" type="range" min="1" max="4" step="0.1" value="1" aria-label="ズーム">
+            <span class="zoom-label" id="zoomLabel">1.0×</span>
+          </div>
+
+          <div class="camera-dock" role="toolbar" aria-label="カメラ操作">
+            <button class="camera-action interactive" id="torchButton" type="button" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 2h6l-1 7h3l-7 13 1-9H7z"/></svg>
+              <span data-i18n="flash">ライト</span>
+            </button>
+            <button class="camera-action interactive" id="imageButton" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="9" r="1.4"/><path d="m5 17 4.5-4.5 3.2 3.2 2.2-2.2L19 17"/></svg>
+              <span data-i18n="fromImage">画像から</span>
+            </button>
+            <button class="camera-action interactive" id="historyButton" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>
+              <span data-i18n="history">履歴</span>
+              <span class="history-badge" id="historyBadge">0</span>
+            </button>
+            <button class="camera-action interactive" id="switchCameraButton" type="button" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.8-4L3 10M4 13a8 8 0 0 0 14.8 4L21 14"/><path d="M3 5v5h5M21 19v-5h-5"/></svg>
+              <span data-i18n="switchCamera">カメラ</span>
+            </button>
+          </div>
+
+          <input id="imageInput" type="file" accept="image/*" class="hidden">
+        </div>
+      </section>
+
+      <aside class="panel history-panel">
+        <div class="panel-head">
+          <div>
+            <h2 data-i18n="history">履歴</h2>
+            <p data-i18n="historyLead">読み取った内容を端末内に保存します。</p>
+          </div>
+          <button class="subtle-button danger" id="clearHistoryDesktopButton" type="button" data-i18n="clearHistory">履歴を全消去</button>
+        </div>
+        <div class="history-tools">
+          <input class="history-search" id="historySearchDesktop" type="search" placeholder="履歴を検索" data-i18n-placeholder="searchHistory">
+        </div>
+        <div class="history-list" id="historyListDesktop"></div>
+      </aside>
+    </div>
+  </main>
+
+  <footer><span id="footerName">QRコードリーダー</span> · <span data-i18n="footer">ブラウザー内でQRコードを読み取ります</span></footer>
+
+  <dialog class="help-dialog" id="helpDialog">
+    <div class="dialog-header">
+      <h2 data-i18n="helpTitle">使い方と注意事項</h2>
+      <button class="dialog-close" id="closeHelpButton" type="button" aria-label="閉じる" data-i18n-aria-label="close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="dialog-body">
+      <h3 data-i18n="helpBasicsTitle">基本操作</h3>
+      <ul>
+        <li data-i18n="helpStep1">起動するとカメラが開きます。QRコードを中央付近に入れると自動で読み取ります。</li>
+        <li data-i18n="helpStep2">「画像から」でスクリーンショットや保存済み画像のQRコードも読み取れます。</li>
+        <li data-i18n="helpStep3">ズームはスライダーのほか、カメラ画面を上下にスワイプして操作できます。2本指のピンチにも対応します。</li>
+      </ul>
+      <h3 data-i18n="helpControlsTitle">カメラ操作</h3>
+      <p data-i18n="helpControlsBody">ライトと光学ズームは、端末・カメラ・ブラウザーが対応している場合に使えます。光学ズームが使えない場合はデジタルズームへ自動で切り替えます。</p>
+      <h3 data-i18n="helpHistoryTitle">履歴</h3>
+      <p data-i18n="helpHistoryBody">履歴はこのブラウザーのlocalStorageに保存します。サイトデータを削除すると履歴も消えます。</p>
+      <h3 data-i18n="helpPrivacyTitle">プライバシー</h3>
+      <p data-i18n="helpPrivacyBody">カメラ映像・画像・読み取り結果はブラウザー内で処理します。配布用HTMLはQR解析ライブラリも内包し、実行時の外部通信を行いません。</p>
+      <h3 data-i18n="helpNotesTitle">注意事項</h3>
+      <ul>
+        <li data-i18n="helpNotePermission">カメラ利用にはブラウザーの許可が必要です。ブラウザーによってはHTTPSまたはlocalhostでの利用が必要です。</li>
+        <li data-i18n="helpNoteLinks">QRコード内のURLは自動では開きません。内容を確認してから「開く」を押してください。</li>
+        <li data-i18n="helpNoteAccuracy">小さい・ぼやけた・反射したQRコードは読み取りにくい場合があります。距離やズーム、明るさを調整してください。</li>
+      </ul>
+      <p class="dialog-note" data-i18n="helpOffline">GitHub Pagesで公開しても、スキャン処理は端末内で完結します。</p>
+    </div>
+  </dialog>
+
+  <dialog class="history-dialog" id="historyDialog">
+    <div class="dialog-header">
+      <h2 data-i18n="history">履歴</h2>
+      <button class="dialog-close" id="closeHistoryButton" type="button" aria-label="閉じる" data-i18n-aria-label="close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="history-dialog-body">
+      <div class="history-tools">
+        <input class="history-search" id="historySearchMobile" type="search" placeholder="履歴を検索" data-i18n-placeholder="searchHistory">
+        <button class="subtle-button danger" id="clearHistoryMobileButton" type="button" data-i18n="clearHistory">履歴を全消去</button>
+      </div>
+      <div class="history-list" id="historyListMobile"></div>
+    </div>
+  </dialog>
+
+  <dialog class="result-dialog" id="resultDialog">
+    <div class="dialog-header">
+      <h2 data-i18n="resultTitle">読み取り結果</h2>
+      <button class="dialog-close" id="closeResultButton" type="button" aria-label="閉じる" data-i18n-aria-label="close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="result-body">
+      <div class="result-kicker" id="resultKicker">
+        <span id="resultTypeIcon" aria-hidden="true"></span>
+        <span id="resultType">TEXT</span>
+      </div>
+      <div class="result-value" id="resultValue"></div>
+      <div class="result-detail" id="resultDetail"></div>
+      <div class="result-actions">
+        <button class="result-button primary" id="openResultButton" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12h6"/><path d="M7 15h-.5a3.5 3.5 0 1 1 0-7H10"/><path d="M14 8h3.5a3.5 3.5 0 1 1 0 7H14"/></svg>
+          <span data-i18n="open">開く</span>
+        </button>
+        <button class="result-button" id="copyResultButton" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6"/><path d="M9 2h6v4H9z"/><path d="M8 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/><path d="M9 10h6M9 14h6"/></svg>
+          <span data-i18n="copy">コピー</span>
+        </button>
+        <button class="result-button" id="shareResultButton" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="18" cy="19" r="2"/><path d="m8 11 8-5"/><path d="m8 13 8 5"/></svg>
+          <span data-i18n="share">共有</span>
+        </button>
+        <button class="result-button wide" id="scanAgainButton" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v6h-2zM14 18h4v2h-4z"/></svg>
+          <span data-i18n="scanAgain">スキャンに戻る</span>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="confirm-dialog" id="confirmDialog">
+    <div class="dialog-header">
+      <h2 data-i18n="confirmTitle">確認</h2>
+      <button class="dialog-close" id="closeConfirmButton" type="button" aria-label="閉じる" data-i18n-aria-label="close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="confirm-body">
+      <p class="confirm-message" id="confirmMessage">この操作を実行しますか？</p>
+      <div class="confirm-actions">
+        <button class="result-button" id="confirmCancelButton" type="button" data-i18n="cancel">キャンセル</button>
+        <button class="result-button primary" id="confirmOkButton" type="button">OK</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const APP_CONFIG = __APP_CONFIG_JSON__;
+      const BUILD_MANIFEST = __BUILD_MANIFEST_JSON__;
+      const EMBEDDED_ASSET_BUNDLE_BASE64 = '__EMBEDDED_ASSET_BUNDLE_BASE64__';
+
+      function decodeBase64Bytes(base64) {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+        return bytes;
+      }
+      function decodeBase64Utf8(base64) { return new TextDecoder().decode(decodeBase64Bytes(base64)); }
+      const assetBundle = JSON.parse(decodeBase64Utf8(EMBEDDED_ASSET_BUNDLE_BASE64));
+      const blobUrls = new Set();
+      window.StandaloneAssets = Object.freeze({
+        manifest: BUILD_MANIFEST,
+        list() {
+          return Object.entries(assetBundle.dependencies || {}).flatMap(([dependencyId, dependency]) =>
+            Object.keys(dependency.assets || {}).map(assetKey => `${dependencyId}/${assetKey}`));
+        },
+        has(dependencyId, assetKey) { return Boolean(assetBundle.dependencies?.[dependencyId]?.assets?.[assetKey]); },
+        bytes(dependencyId, assetKey) {
+          const asset = assetBundle.dependencies?.[dependencyId]?.assets?.[assetKey];
+          if (!asset) throw new Error(`Embedded asset not found: ${dependencyId}/${assetKey}`);
+          return decodeBase64Bytes(asset.base64);
+        },
+        blobUrl(dependencyId, assetKey) {
+          const asset = assetBundle.dependencies?.[dependencyId]?.assets?.[assetKey];
+          if (!asset) throw new Error(`Embedded asset not found: ${dependencyId}/${assetKey}`);
+          const url = URL.createObjectURL(new Blob([this.bytes(dependencyId, assetKey)], { type: asset.mime || 'application/octet-stream' }));
+          blobUrls.add(url);
+          return url;
+        },
+        async loadClassicScript(dependencyId, assetKey, globalName = '') {
+          const sourceUrl = this.blobUrl(dependencyId, assetKey);
+          try {
+            await new Promise((resolve, reject) => {
+              const script = document.createElement('script');
+              script.src = sourceUrl;
+              script.onload = resolve;
+              script.onerror = () => reject(new Error(`Failed to load embedded script: ${dependencyId}/${assetKey}`));
+              document.head.append(script);
+            });
+            return globalName ? window[globalName] : true;
+          } finally {
+            URL.revokeObjectURL(sourceUrl);
+            blobUrls.delete(sourceUrl);
+          }
+        }
+      });
+      window.addEventListener('pagehide', () => {
+        blobUrls.forEach(url => URL.revokeObjectURL(url));
+        blobUrls.clear();
+      });
+
+      const translations = {
+        ja: {
+          appName: 'QRコードリーダー', brandMeta: '単一HTML・端末内処理・履歴保存',
+          introTitle: 'QRコードをすぐ読む', introLead: 'カメラでも画像でも読み取り。結果と履歴はこのブラウザー内だけで扱います。', localBadge: '実行時通信なし',
+          scannerTitle: 'スキャン', scannerLead: 'QRコードを枠に入れると自動で読み取ります。', cameraStarting: 'カメラを起動しています…', cameraReady: 'QRコードをかざしてください', cameraPaused: '結果を確認中', cameraSwitching: 'カメラを切り替えています…',
+          cameraUnavailableTitle: 'カメラを使用できません', cameraUnavailableBody: 'カメラの権限を確認するか、画像から読み込んでください。', cameraPermissionDenied: 'カメラの許可がありません。ブラウザーの権限設定を確認してください。', cameraNotSupported: 'この環境ではカメラを起動できません。画像からの読み取りは利用できます。', retryCamera: '再試行',
+          flash: 'ライト', fromImage: '画像から', history: '履歴', switchCamera: 'カメラ', gestureHint: '画面を上下にスワイプしてズーム',
+          historyLead: '読み取った内容を端末内に保存します。', clearHistory: '履歴を全消去', delete: '削除', cancel: 'キャンセル', confirmTitle: '確認', confirmDeleteHistoryItem: 'この履歴を削除しますか？', confirmDeleteAction: '削除する', confirmClearHistoryAction: '全消去する', searchHistory: '履歴を検索', noHistory: 'まだ履歴はありません。', noSearchResults: '一致する履歴がありません。', confirmClearHistory: '読み取り履歴をすべて削除しますか？',
+          helpTitle: '使い方と注意事項', close: '閉じる', helpBasicsTitle: '基本操作', helpStep1: '起動するとカメラが開きます。QRコードを中央付近に入れると自動で読み取ります。', helpStep2: '「画像から」でスクリーンショットや保存済み画像のQRコードも読み取れます。', helpStep3: 'ズームはスライダーのほか、カメラ画面を上下にスワイプして操作できます。2本指のピンチにも対応します。', helpControlsTitle: 'カメラ操作', helpControlsBody: 'ライトと光学ズームは、端末・カメラ・ブラウザーが対応している場合に使えます。光学ズームが使えない場合はデジタルズームへ自動で切り替えます。', helpHistoryTitle: '履歴', helpHistoryBody: '履歴はこのブラウザーのlocalStorageに保存します。サイトデータを削除すると履歴も消えます。', helpPrivacyTitle: 'プライバシー', helpPrivacyBody: 'カメラ映像・画像・読み取り結果はブラウザー内で処理します。配布用HTMLはQR解析ライブラリも内包し、実行時の外部通信を行いません。', helpNotesTitle: '注意事項', helpNotePermission: 'カメラ利用にはブラウザーの許可が必要です。ブラウザーによってはHTTPSまたはlocalhostでの利用が必要です。', helpNoteLinks: 'QRコード内のURLは自動では開きません。内容を確認してから「開く」を押してください。', helpNoteAccuracy: '小さい・ぼやけた・反射したQRコードは読み取りにくい場合があります。距離やズーム、明るさを調整してください。', helpOffline: 'GitHub Pagesで公開しても、スキャン処理は端末内で完結します。',
+          resultTitle: '読み取り結果', open: '開く', copy: 'コピー', share: '共有', scanAgain: 'スキャンに戻る', copied: 'コピーしました', shareFailed: '共有できませんでした', noQrFound: 'この画像からQRコードを見つけられませんでした', imageReadFailed: '画像を読み込めませんでした', qrEngineFailed: 'QR解析エンジンを読み込めませんでした', historyCleared: '履歴を全消去しました', itemDeleted: '履歴から削除しました', torchUnavailable: 'このカメラではライトを制御できません', zoomOptical: '光学ズーム', zoomDigital: 'デジタルズーム',
+          typeUrl: 'URL', typeEmail: 'メール', typePhone: '電話', typeSms: 'SMS', typeGeo: '位置情報', typeWifi: 'Wi-Fi', typeVcard: '連絡先', typeText: 'テキスト', sourceCamera: 'カメラ', sourceImage: '画像',
+          wifiSsid: 'SSID', wifiSecurity: '暗号化', wifiPassword: 'パスワード', footer: 'ブラウザー内でQRコードを読み取ります'
+        },
+        en: {
+          appName: 'QR Reader', brandMeta: 'Single HTML · Local processing · History',
+          introTitle: 'Scan QR codes instantly', introLead: 'Use the camera or an existing image. Results and history stay in this browser.', localBadge: 'No runtime network',
+          scannerTitle: 'Scan', scannerLead: 'Place a QR code in view and it will be detected automatically.', cameraStarting: 'Starting camera…', cameraReady: 'Point at a QR code', cameraPaused: 'Reviewing result', cameraSwitching: 'Switching camera…',
+          cameraUnavailableTitle: 'Camera unavailable', cameraUnavailableBody: 'Check camera permission, or scan from an existing image.', cameraPermissionDenied: 'Camera permission was denied. Check your browser permission settings.', cameraNotSupported: 'The camera cannot be started in this environment. Image scanning is still available.', retryCamera: 'Retry',
+          flash: 'Torch', fromImage: 'Image', history: 'History', switchCamera: 'Camera', gestureHint: 'Swipe up or down to zoom',
+          historyLead: 'Scanned results are saved locally on this device.', clearHistory: 'Clear all history', delete: 'Delete', cancel: 'Cancel', confirmTitle: 'Confirm', confirmDeleteHistoryItem: 'Delete this history item?', confirmDeleteAction: 'Delete', confirmClearHistoryAction: 'Clear all', searchHistory: 'Search history', noHistory: 'No scan history yet.', noSearchResults: 'No matching history.', confirmClearHistory: 'Delete all scan history?',
+          helpTitle: 'How to use & notes', close: 'Close', helpBasicsTitle: 'Basics', helpStep1: 'The camera opens at startup. Point it at a QR code to scan automatically.', helpStep2: 'Use Image to scan a screenshot or an existing photo.', helpStep3: 'Zoom with the slider or swipe vertically on the camera preview. Pinch zoom is also supported.', helpControlsTitle: 'Camera controls', helpControlsBody: 'Torch and optical zoom are available when the device, camera, and browser expose those controls. Digital zoom is used automatically when optical zoom is unavailable.', helpHistoryTitle: 'History', helpHistoryBody: 'History is stored in this browser using localStorage. Clearing site data also removes the history.', helpPrivacyTitle: 'Privacy', helpPrivacyBody: 'Camera frames, images, and decoded results are processed inside the browser. The distributable HTML embeds its QR decoder and makes no runtime network requests.', helpNotesTitle: 'Notes', helpNotePermission: 'Camera access requires browser permission. Depending on the browser, HTTPS or localhost may be required.', helpNoteLinks: 'URLs are never opened automatically. Review the result before choosing Open.', helpNoteAccuracy: 'Very small, blurry, or reflective QR codes can be harder to read. Adjust distance, zoom, and lighting.', helpOffline: 'Even when hosted on GitHub Pages, scanning stays on the device.',
+          resultTitle: 'Scan result', open: 'Open', copy: 'Copy', share: 'Share', scanAgain: 'Back to scanner', copied: 'Copied', shareFailed: 'Could not share', noQrFound: 'No QR code was found in this image', imageReadFailed: 'Could not read the image', qrEngineFailed: 'Could not load the QR decoder', historyCleared: 'All history cleared', itemDeleted: 'Removed from history', torchUnavailable: 'Torch control is unavailable for this camera', zoomOptical: 'Optical zoom', zoomDigital: 'Digital zoom',
+          typeUrl: 'URL', typeEmail: 'Email', typePhone: 'Phone', typeSms: 'SMS', typeGeo: 'Location', typeWifi: 'Wi-Fi', typeVcard: 'Contact', typeText: 'Text', sourceCamera: 'Camera', sourceImage: 'Image',
+          wifiSsid: 'SSID', wifiSecurity: 'Security', wifiPassword: 'Password', footer: 'QR codes are decoded in your browser'
+        }
+      };
+
+      const $ = selector => document.querySelector(selector);
+      const video = $('#video');
+      const cameraStage = $('#cameraStage');
+      const scanCanvas = $('#scanCanvas');
+      const scanContext = scanCanvas.getContext('2d', { willReadFrequently: true });
+      const cameraStatus = $('#cameraStatus');
+      const cameraError = $('#cameraError');
+      const cameraErrorText = $('#cameraErrorText');
+      const scanFrame = $('#scanFrame');
+      const torchButton = $('#torchButton');
+      const switchCameraButton = $('#switchCameraButton');
+      const zoomRange = $('#zoomRange');
+      const zoomLabel = $('#zoomLabel');
+      const zoomBar = $('#zoomBar');
+      const resultDialog = $('#resultDialog');
+      const historyDialog = $('#historyDialog');
+      const helpDialog = $('#helpDialog');
+      const confirmDialog = $('#confirmDialog');
+      const imageInput = $('#imageInput');
+      const toast = $('#toast');
+
+      const storageKeys = {
+        history: `${APP_CONFIG.slug}:history`,
+        language: `${APP_CONFIG.slug}:language`,
+        gestureHintSeen: `${APP_CONFIG.slug}:gesture-hint-seen`
+      };
+
+      let language = readStorage(storageKeys.language) || detectLanguage();
+      let stream = null;
+      let videoTrack = null;
+      let videoDevices = [];
+      let currentDeviceId = '';
+      let torchOn = false;
+      let torchSupported = false;
+      let zoomMode = 'digital';
+      let zoomMin = 1;
+      let zoomMax = 4;
+      let zoomStep = .1;
+      let zoomValue = 1;
+      let digitalZoom = 1;
+      let jsQrDecoder = null;
+      let nativeDetector = null;
+      let scanLoopId = 0;
+      let lastScanAt = 0;
+      let scanBusy = false;
+      let scanningPaused = false;
+      let lastDetection = { value: '', at: 0 };
+      let currentResult = null;
+      let history = loadHistory();
+      let toastTimer = 0;
+      let statusTimer = 0;
+      let confirmResolver = null;
+      const activePointers = new Map();
+      let gestureStart = null;
+      let pinchStart = null;
+
+      function readStorage(key) { try { return localStorage.getItem(key); } catch { return null; } }
+      function writeStorage(key, value) { try { localStorage.setItem(key, value); return true; } catch { return false; } }
+      function detectLanguage() {
+        if (APP_CONFIG.defaultLanguage === 'ja' || APP_CONFIG.defaultLanguage === 'en') return APP_CONFIG.defaultLanguage;
+        return (navigator.language || '').toLowerCase().startsWith('ja') ? 'ja' : 'en';
+      }
+      function t(key) { return translations[language]?.[key] ?? translations.en[key] ?? key; }
+      function applyLanguage() {
+        document.documentElement.lang = language;
+        document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+        document.querySelectorAll('[data-i18n-aria-label]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAriaLabel)); });
+        $('#languageButton').textContent = language === 'ja' ? 'EN' : '日本語';
+        $('#mobileLanguageButton').textContent = language === 'ja' ? 'EN' : '日本語';
+        $('#brandName').textContent = t('appName');
+        $('#mobileTitle').textContent = t('appName');
+        $('#footerName').textContent = t('appName');
+        document.title = t('appName');
+        renderHistory();
+        if (currentResult) renderResult(currentResult);
+      }
+      function toggleLanguage() {
+        language = language === 'ja' ? 'en' : 'ja';
+        writeStorage(storageKeys.language, language);
+        applyLanguage();
+      }
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 1900);
+      }
+      function showStatus(message, quietAfter = 0) {
+        clearTimeout(statusTimer);
+        cameraStatus.textContent = message;
+        cameraStatus.classList.remove('quiet');
+        if (quietAfter) statusTimer = setTimeout(() => cameraStatus.classList.add('quiet'), quietAfter);
+      }
+      function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
+      function formatZoom(value) { return `${Number(value).toFixed(1)}×`; }
+      function isMobileLayout() { return matchMedia('(max-width: 760px)').matches; }
+      function closeConfirm(result = false) {
+        if (!confirmDialog.open) return;
+        const resolver = confirmResolver;
+        confirmResolver = null;
+        confirmDialog.close();
+        if (resolver) resolver(result);
+      }
+      function showConfirm(message, confirmLabel) {
+        $('#confirmMessage').textContent = message;
+        $('#confirmOkButton').textContent = confirmLabel;
+        return new Promise(resolve => {
+          confirmResolver = resolve;
+          confirmDialog.showModal();
+        });
+      }
+
+      function loadHistory() {
+        try {
+          const parsed = JSON.parse(readStorage(storageKeys.history) || '[]');
+          return Array.isArray(parsed) ? parsed.filter(item => item && typeof item.data === 'string' && Number.isFinite(item.timestamp)).slice(0, 200) : [];
+        } catch { return []; }
+      }
+      function saveHistory() { writeStorage(storageKeys.history, JSON.stringify(history.slice(0, 200))); }
+      function addHistory(data, source) {
+        const now = Date.now();
+        const previous = history[0];
+        if (previous && previous.data === data && now - previous.timestamp < 4000) {
+          previous.timestamp = now;
+          previous.source = source;
+        } else {
+          history.unshift({ id: crypto.randomUUID ? crypto.randomUUID() : `${now}-${Math.random().toString(16).slice(2)}`, data, source, timestamp: now });
+          if (history.length > 200) history.length = 200;
+        }
+        saveHistory();
+        renderHistory();
+      }
+      async function deleteHistoryItem(id) {
+        const ok = await showConfirm(t('confirmDeleteHistoryItem'), t('confirmDeleteAction'));
+        if (!ok) return;
+        history = history.filter(item => item.id !== id);
+        saveHistory();
+        renderHistory();
+        showToast(t('itemDeleted'));
+      }
+      async function clearHistory() {
+        if (!history.length) return;
+        const ok = await showConfirm(t('confirmClearHistory'), t('confirmClearHistoryAction'));
+        if (!ok) return;
+        history = [];
+        saveHistory();
+        renderHistory();
+        showToast(t('historyCleared'));
+      }
+      function groupLabel(timestamp) {
+        const date = new Date(timestamp);
+        const today = new Date();
+        const startToday = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+        const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+        const diffDays = Math.round((startToday - startDate) / 86400000);
+        if (diffDays === 0) return language === 'ja' ? '今日' : 'Today';
+        if (diffDays === 1) return language === 'ja' ? '昨日' : 'Yesterday';
+        return new Intl.DateTimeFormat(language === 'ja' ? 'ja-JP' : 'en', { year: 'numeric', month: 'short', day: 'numeric' }).format(date);
+      }
+      function historyTypeLabel(data) { return t(`type${classifyPayload(data).kind[0].toUpperCase()}${classifyPayload(data).kind.slice(1)}`) || t('typeText'); }
+      function createIcon(kind = 'text') {
+        const icons = {
+          qr: '<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v6h-2zM14 18h4v2h-4z"/>',
+          url: '<path d="M9 12h6"/><path d="M7 15h-.5a3.5 3.5 0 1 1 0-7H10"/><path d="M14 8h3.5a3.5 3.5 0 1 1 0 7H14"/>',
+          email: '<path d="M4 6h16v12H4z"/><path d="m5 7 7 6 7-6"/>',
+          phone: '<path d="M15 14c-2.5-1.2-3.8-2.5-5-5l1.7-1.7a1 1 0 0 0 .22-1.06L11 3H5a1 1 0 0 0-1 1c0 8.3 6.7 15 15 15a1 1 0 0 0 1-1v-6l-3.24-.92a1 1 0 0 0-1.06.22z"/>',
+          clipboard: '<path d="M9 4h6"/><path d="M9 2h6v4H9z"/><path d="M8 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/><path d="M9 10h6M9 14h6"/>',
+          share: '<circle cx="18" cy="5" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="18" cy="19" r="2"/><path d="m8 11 8-5"/><path d="m8 13 8 5"/>',
+          delete: '<path d="M4 7h16"/><path d="M9 7V5h6v2"/><path d="M8 10v8"/><path d="M12 10v8"/><path d="M16 10v8"/><path d="M6 7l1 13h10l1-13"/>',
+          sms: '<path d="M4 6h16v10H8l-4 4z"/><path d="M8 10h8M8 13h5"/>',
+          geo: '<path d="M12 21s6-5.4 6-11a6 6 0 1 0-12 0c0 5.6 6 11 6 11z"/><circle cx="12" cy="10" r="2.4"/>',
+          wifi: '<path d="M2 8.5A16 16 0 0 1 22 8.5"/><path d="M5 12a11 11 0 0 1 14 0"/><path d="M8.5 15.5a6 6 0 0 1 7 0"/><circle cx="12" cy="19" r="1.2" fill="currentColor" stroke="none"/>',
+          vcard: '<path d="M5 5h14v14H5z"/><path d="M9 10a2.2 2.2 0 1 0 0-.01z"/><path d="M7.5 15a2.8 2.8 0 0 1 3-2h1a2.8 2.8 0 0 1 3 2"/><path d="M14.5 9h2.5M14.5 12h2.5"/>',
+          text: '<path d="M6 6h12M6 10h12M6 14h8M6 18h10"/>'
+        };
+        const ns = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(ns, 'svg');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('stroke-width', '2');
+        svg.setAttribute('stroke-linecap', 'round');
+        svg.setAttribute('stroke-linejoin', 'round');
+        svg.innerHTML = icons[kind] || icons.text;
+        return svg;
+      }
+      function payloadTypeMeta(data) {
+        const info = classifyPayload(data);
+        return { kind: info.kind, label: historyTypeLabel(data), actionUrl: info.actionUrl, detail: info.detail, icon: createIcon(info.kind) };
+      }
+      async function copyValue(value) {
+        try {
+          await navigator.clipboard.writeText(value);
+        } catch {
+          const ta = document.createElement('textarea'); ta.value = value; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove();
+        }
+        showToast(t('copied'));
+      }
+      async function shareValue(value) {
+        if (typeof navigator.share !== 'function') return showToast(t('shareFailed'));
+        try { await navigator.share({ title: t('resultTitle'), text: value }); } catch (error) { if (error?.name !== 'AbortError') showToast(t('shareFailed')); }
+      }
+      function openHistoryValue(item) {
+        const info = classifyPayload(item.data);
+        if (info.actionUrl) {
+          if (/^https?:/i.test(info.actionUrl)) window.open(info.actionUrl, '_blank', 'noopener,noreferrer');
+          else window.location.href = info.actionUrl;
+          return;
+        }
+        showResult(item.data, item.source, false);
+      }
+      function makeHistoryAction(labelKey, iconKind, onClick, extraClass = '') {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `history-action${extraClass ? ` ${extraClass}` : ''}`;
+        button.append(createIcon(iconKind));
+        const label = document.createElement('span');
+        label.textContent = t(labelKey);
+        button.append(label);
+        button.addEventListener('click', event => { event.stopPropagation(); onClick(); });
+        return button;
+      }
+      function renderHistoryList(container, query) {
+        const normalized = (query || '').trim().toLocaleLowerCase();
+        const items = normalized ? history.filter(item => item.data.toLocaleLowerCase().includes(normalized)) : history;
+        container.replaceChildren();
+        if (!items.length) {
+          const empty = document.createElement('div'); empty.className = 'history-empty'; empty.textContent = history.length ? t('noSearchResults') : t('noHistory'); container.append(empty); return;
+        }
+        let lastGroup = '';
+        items.forEach(item => {
+          const group = groupLabel(item.timestamp);
+          if (group !== lastGroup) {
+            const label = document.createElement('div'); label.className = 'history-group-title'; label.textContent = group; container.append(label); lastGroup = group;
+          }
+          const meta = payloadTypeMeta(item.data);
+          const row = document.createElement('div'); row.className = 'history-item'; row.setAttribute('role', 'button'); row.tabIndex = 0;
+          const main = document.createElement('div'); main.className = 'history-item-main';
+          const top = document.createElement('div'); top.className = 'history-item-top';
+          const type = document.createElement('span'); type.className = 'history-item-type'; type.append(meta.icon, document.createTextNode(meta.label));
+          const time = document.createElement('span'); time.className = 'history-item-time';
+          time.textContent = `${new Intl.DateTimeFormat(language === 'ja' ? 'ja-JP' : 'en', { hour: '2-digit', minute: '2-digit' }).format(new Date(item.timestamp))} · ${item.source === 'image' ? t('sourceImage') : t('sourceCamera')}`;
+          top.append(type, time);
+          const value = document.createElement('div'); value.className = 'history-item-value'; value.textContent = item.data;
+          const actions = document.createElement('div'); actions.className = 'history-item-actions';
+          actions.append(
+            makeHistoryAction('open', meta.actionUrl ? 'url' : 'qr', () => openHistoryValue(item)),
+            makeHistoryAction('copy', 'clipboard', () => copyValue(item.data)),
+            makeHistoryAction('share', 'share', () => shareValue(item.data)),
+            makeHistoryAction('delete', 'delete', () => deleteHistoryItem(item.id), 'danger')
+          );
+          main.append(top, value, actions);
+          row.append(main);
+          const openHistoryItem = () => showResult(item.data, item.source, false);
+          row.addEventListener('click', openHistoryItem);
+          row.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openHistoryItem(); }
+          });
+          container.append(row);
+        });
+      }
+      function renderHistory() {
+        renderHistoryList($('#historyListDesktop'), $('#historySearchDesktop').value);
+        renderHistoryList($('#historyListMobile'), $('#historySearchMobile').value);
+        const count = history.length;
+        $('#historyBadge').textContent = String(Math.min(count, 99));
+        $('#historyBadge').classList.toggle('show', count > 0);
+        $('#clearHistoryDesktopButton').disabled = !count;
+        $('#clearHistoryMobileButton').disabled = !count;
+      }
+
+      function classifyPayload(raw) {
+        const value = raw.trim();
+        if (/^WIFI:/i.test(value)) return { kind: 'wifi', actionUrl: '', detail: parseWifi(value) };
+        if (/^BEGIN:VCARD/i.test(value)) return { kind: 'vcard', actionUrl: '', detail: '' };
+        if (/^https?:\/\//i.test(value)) return { kind: 'url', actionUrl: value, detail: '' };
+        if (/^mailto:/i.test(value)) return { kind: 'email', actionUrl: value, detail: '' };
+        if (/^tel:/i.test(value)) return { kind: 'phone', actionUrl: value, detail: '' };
+        if (/^sms:/i.test(value)) return { kind: 'sms', actionUrl: value, detail: '' };
+        if (/^geo:/i.test(value)) return { kind: 'geo', actionUrl: value, detail: '' };
+        return { kind: 'text', actionUrl: '', detail: '' };
+      }
+      function parseWifi(raw) {
+        const text = raw.replace(/^WIFI:/i, '').replace(/;;\s*$/, '');
+        const parts = {};
+        let current = '', escaped = false, key = '';
+        const pairs = [];
+        for (const ch of text) {
+          if (escaped) { current += ch; escaped = false; continue; }
+          if (ch === '\\') { escaped = true; continue; }
+          if (ch === ';') { pairs.push(current); current = ''; continue; }
+          current += ch;
+        }
+        if (current) pairs.push(current);
+        pairs.forEach(pair => {
+          const index = pair.indexOf(':');
+          if (index > 0) { key = pair.slice(0, index).toUpperCase(); parts[key] = pair.slice(index + 1); }
+        });
+        return [
+          parts.S ? `${t('wifiSsid')}: ${parts.S}` : '',
+          parts.T ? `${t('wifiSecurity')}: ${parts.T}` : '',
+          parts.P ? `${t('wifiPassword')}: ${parts.P}` : ''
+        ].filter(Boolean).join('\n');
+      }
+      function resultTypeLabel(kind) {
+        const map = { url: 'typeUrl', email: 'typeEmail', phone: 'typePhone', sms: 'typeSms', geo: 'typeGeo', wifi: 'typeWifi', vcard: 'typeVcard', text: 'typeText' };
+        return t(map[kind] || 'typeText');
+      }
+      function renderResult(result) {
+        const info = classifyPayload(result.data);
+        $('#resultTypeIcon').replaceChildren(createIcon(info.kind));
+        $('#resultType').textContent = resultTypeLabel(info.kind);
+        $('#resultValue').textContent = result.data;
+        $('#resultDetail').textContent = info.detail || '';
+        $('#resultDetail').classList.toggle('hidden', !info.detail);
+        $('#openResultButton').classList.toggle('hidden', !info.actionUrl);
+        $('#shareResultButton').classList.toggle('hidden', typeof navigator.share !== 'function');
+      }
+      function showResult(data, source = 'camera', addToHistoryFlag = true) {
+        const now = Date.now();
+        if (addToHistoryFlag && data === lastDetection.value && now - lastDetection.at < 1800) return;
+        lastDetection = { value: data, at: now };
+        scanningPaused = true;
+        showStatus(t('cameraPaused'));
+        scanFrame.classList.add('detected');
+        setTimeout(() => scanFrame.classList.remove('detected'), 320);
+        try { navigator.vibrate?.(55); } catch { /* ignored */ }
+        if (addToHistoryFlag) addHistory(data, source);
+        currentResult = { data, source };
+        renderResult(currentResult);
+        if (historyDialog.open) historyDialog.close();
+        if (!resultDialog.open) resultDialog.showModal();
+      }
+      function resumeScanning() {
+        scanningPaused = false;
+        if (stream) showStatus(t('cameraReady'), 1500);
+      }
+      function closeResult() { if (resultDialog.open) resultDialog.close(); resumeScanning(); }
+      async function copyResult() {
+        if (!currentResult) return;
+        await copyValue(currentResult.data);
+      }
+      async function shareResult() {
+        if (!currentResult) return;
+        await shareValue(currentResult.data);
+      }
+      function openResult() {
+        if (!currentResult) return;
+        const { actionUrl } = classifyPayload(currentResult.data);
+        if (!actionUrl) return;
+        if (/^https?:/i.test(actionUrl)) window.open(actionUrl, '_blank', 'noopener,noreferrer');
+        else window.location.href = actionUrl;
+      }
+
+      async function initializeDecoder() {
+        try {
+          if (window.StandaloneAssets.has('jsqr', 'main')) jsQrDecoder = await window.StandaloneAssets.loadClassicScript('jsqr', 'main', 'jsQR');
+          if (!jsQrDecoder && typeof window.jsQR === 'function') jsQrDecoder = window.jsQR;
+        } catch (error) { console.error(error); }
+        if ('BarcodeDetector' in window) {
+          try {
+            if (typeof BarcodeDetector.getSupportedFormats === 'function') {
+              const formats = await BarcodeDetector.getSupportedFormats();
+              if (!formats.includes('qr_code')) throw new Error('qr_code format unavailable');
+            }
+            nativeDetector = new BarcodeDetector({ formats: ['qr_code'] });
+          } catch { nativeDetector = null; }
+        }
+        if (!jsQrDecoder && !nativeDetector) throw new Error(t('qrEngineFailed'));
+      }
+
+      function stopCamera() {
+        cancelAnimationFrame(scanLoopId);
+        scanLoopId = 0;
+        if (stream) stream.getTracks().forEach(track => track.stop());
+        stream = null; videoTrack = null; video.srcObject = null; scanBusy = false; torchOn = false; torchButton.classList.remove('active');
+      }
+      async function enumerateVideoDevices() {
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          videoDevices = devices.filter(device => device.kind === 'videoinput');
+          switchCameraButton.disabled = videoDevices.length < 2;
+        } catch { videoDevices = []; switchCameraButton.disabled = true; }
+      }
+      function cameraConstraints(deviceId = '') {
+        const videoConstraints = {
+          width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30, max: 30 }
+        };
+        if (deviceId) videoConstraints.deviceId = { exact: deviceId };
+        else videoConstraints.facingMode = { ideal: 'environment' };
+        return { audio: false, video: videoConstraints };
+      }
+      async function startCamera(deviceId = '') {
+        stopCamera();
+        cameraError.classList.remove('show');
+        showStatus(t(deviceId ? 'cameraSwitching' : 'cameraStarting'));
+        if (!navigator.mediaDevices?.getUserMedia) {
+          showCameraError(t('cameraNotSupported'));
+          return;
+        }
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(cameraConstraints(deviceId));
+          video.srcObject = stream;
+          await video.play();
+          videoTrack = stream.getVideoTracks()[0] || null;
+          currentDeviceId = videoTrack?.getSettings?.().deviceId || deviceId || '';
+          await enumerateVideoDevices();
+          setupCameraCapabilities();
+          showStatus(t('cameraReady'), 1800);
+          scanningPaused = false;
+          lastScanAt = 0;
+          scanLoopId = requestAnimationFrame(scanLoop);
+          showGestureHintOnce();
+        } catch (error) {
+          console.error(error);
+          const denied = error?.name === 'NotAllowedError' || error?.name === 'SecurityError';
+          showCameraError(t(denied ? 'cameraPermissionDenied' : 'cameraUnavailableBody'));
+        }
+      }
+      function showCameraError(message) {
+        stopCamera();
+        cameraErrorText.textContent = message;
+        cameraError.classList.add('show');
+        cameraStatus.classList.add('quiet');
+      }
+      function setupCameraCapabilities() {
+        torchOn = false;
+        torchButton.classList.remove('active');
+        const capabilities = videoTrack?.getCapabilities?.() || {};
+        torchSupported = Array.isArray(capabilities.torch) ? capabilities.torch.includes(true) : capabilities.torch === true;
+        torchButton.disabled = !torchSupported;
+        const z = capabilities.zoom;
+        if (z && Number.isFinite(z.min) && Number.isFinite(z.max) && z.max > z.min) {
+          zoomMode = 'hardware';
+          zoomMin = Math.max(.5, z.min); zoomMax = z.max; zoomStep = z.step || .1;
+          const current = videoTrack.getSettings?.().zoom;
+          zoomValue = clamp(Number.isFinite(current) ? current : Math.max(1, zoomMin), zoomMin, zoomMax);
+          digitalZoom = 1;
+        } else {
+          zoomMode = 'digital'; zoomMin = 1; zoomMax = 4; zoomStep = .1; zoomValue = 1; digitalZoom = 1;
+        }
+        zoomRange.min = String(zoomMin); zoomRange.max = String(zoomMax); zoomRange.step = String(zoomStep); zoomRange.value = String(zoomValue);
+        zoomBar.classList.remove('disabled');
+        updateZoomUi();
+      }
+      async function setZoom(value) {
+        const next = clamp(Number(value), zoomMin, zoomMax);
+        zoomValue = next;
+        if (zoomMode === 'hardware' && videoTrack) {
+          try {
+            await videoTrack.applyConstraints({ advanced: [{ zoom: next }] });
+            digitalZoom = 1;
+          } catch {
+            zoomMode = 'digital'; zoomMin = 1; zoomMax = 4; zoomStep = .1; zoomValue = clamp(next, 1, 4); digitalZoom = zoomValue;
+            zoomRange.min = '1'; zoomRange.max = '4'; zoomRange.step = '0.1';
+          }
+        } else {
+          digitalZoom = next;
+        }
+        updateZoomUi();
+      }
+      function updateZoomUi() {
+        zoomRange.value = String(zoomValue);
+        zoomLabel.textContent = formatZoom(zoomValue);
+        zoomRange.setAttribute('aria-valuetext', `${formatZoom(zoomValue)} · ${t(zoomMode === 'hardware' ? 'zoomOptical' : 'zoomDigital')}`);
+        cameraStage.style.setProperty('--digital-zoom', zoomMode === 'digital' ? String(digitalZoom) : '1');
+      }
+      async function toggleTorch() {
+        if (!torchSupported || !videoTrack) { showToast(t('torchUnavailable')); return; }
+        const next = !torchOn;
+        try {
+          await videoTrack.applyConstraints({ advanced: [{ torch: next }] });
+          torchOn = next;
+          torchButton.classList.toggle('active', torchOn);
+        } catch { torchSupported = false; torchButton.disabled = true; showToast(t('torchUnavailable')); }
+      }
+      async function switchCamera() {
+        if (videoDevices.length < 2) return;
+        const index = Math.max(0, videoDevices.findIndex(device => device.deviceId === currentDeviceId));
+        const next = videoDevices[(index + 1) % videoDevices.length];
+        await startCamera(next.deviceId);
+      }
+
+      function visibleVideoSourceRect() {
+        const vw = video.videoWidth || 1, vh = video.videoHeight || 1;
+        const cw = cameraStage.clientWidth || 1, ch = cameraStage.clientHeight || 1;
+        const sourceAspect = vw / vh, containerAspect = cw / ch;
+        let sw = vw, sh = vh, sx = 0, sy = 0;
+        if (sourceAspect > containerAspect) { sw = vh * containerAspect; sx = (vw - sw) / 2; }
+        else { sh = vw / containerAspect; sy = (vh - sh) / 2; }
+        if (zoomMode === 'digital' && digitalZoom > 1) {
+          const newW = sw / digitalZoom, newH = sh / digitalZoom;
+          sx += (sw - newW) / 2; sy += (sh - newH) / 2; sw = newW; sh = newH;
+        }
+        return { sx, sy, sw, sh };
+      }
+      function drawVideoFrame(maxDimension = 780) {
+        const { sx, sy, sw, sh } = visibleVideoSourceRect();
+        const scale = Math.min(1, maxDimension / Math.max(sw, sh));
+        const width = Math.max(1, Math.round(sw * scale));
+        const height = Math.max(1, Math.round(sh * scale));
+        if (scanCanvas.width !== width || scanCanvas.height !== height) { scanCanvas.width = width; scanCanvas.height = height; }
+        scanContext.drawImage(video, sx, sy, sw, sh, 0, 0, width, height);
+        return { width, height };
+      }
+      async function decodeCanvas(canvas, inversionAttempts = 'dontInvert') {
+        if (nativeDetector) {
+          try {
+            const codes = await nativeDetector.detect(canvas);
+            const qr = codes.find(code => code.rawValue);
+            if (qr?.rawValue) return qr.rawValue;
+          } catch { nativeDetector = null; }
+        }
+        if (!jsQrDecoder) return '';
+        const ctx = canvas === scanCanvas ? scanContext : canvas.getContext('2d', { willReadFrequently: true });
+        const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const result = jsQrDecoder(image.data, image.width, image.height, { inversionAttempts });
+        return result?.data || '';
+      }
+      async function scanLoop(timestamp) {
+        scanLoopId = requestAnimationFrame(scanLoop);
+        if (!stream || scanningPaused || scanBusy || document.hidden || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
+        if (timestamp - lastScanAt < 125) return;
+        lastScanAt = timestamp;
+        scanBusy = true;
+        try {
+          drawVideoFrame();
+          const data = await decodeCanvas(scanCanvas, 'dontInvert');
+          if (data) showResult(data, 'camera', true);
+        } catch (error) { console.warn('QR scan failed', error); }
+        finally { scanBusy = false; }
+      }
+
+      async function scanImageFile(file) {
+        if (!file) return;
+        scanningPaused = true;
+        let bitmap = null, objectUrl = '';
+        try {
+          const canvas = document.createElement('canvas');
+          if ('createImageBitmap' in window) {
+            bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+            const scale = Math.min(1, 1800 / Math.max(bitmap.width, bitmap.height));
+            canvas.width = Math.max(1, Math.round(bitmap.width * scale)); canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+            canvas.getContext('2d', { willReadFrequently: true }).drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+          } else {
+            objectUrl = URL.createObjectURL(file);
+            const img = new Image();
+            img.src = objectUrl;
+            await img.decode();
+            const scale = Math.min(1, 1800 / Math.max(img.naturalWidth, img.naturalHeight));
+            canvas.width = Math.max(1, Math.round(img.naturalWidth * scale)); canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+            canvas.getContext('2d', { willReadFrequently: true }).drawImage(img, 0, 0, canvas.width, canvas.height);
+          }
+          const data = await decodeCanvas(canvas, 'attemptBoth');
+          if (data) showResult(data, 'image', true);
+          else { scanningPaused = false; showToast(t('noQrFound')); }
+        } catch (error) {
+          console.error(error); scanningPaused = false; showToast(t('imageReadFailed'));
+        } finally {
+          bitmap?.close?.(); if (objectUrl) URL.revokeObjectURL(objectUrl); imageInput.value = '';
+        }
+      }
+
+      function openImagePicker() { imageInput.click(); }
+      function showHistory() {
+        renderHistory();
+        if (isMobileLayout()) { if (!historyDialog.open) historyDialog.showModal(); }
+        else $('#historySearchDesktop').focus();
+      }
+      function showGestureHintOnce() {
+        if (readStorage(storageKeys.gestureHintSeen)) return;
+        writeStorage(storageKeys.gestureHintSeen, '1');
+        const hint = $('#gestureHint'); hint.classList.add('show'); setTimeout(() => hint.classList.remove('show'), 3300);
+      }
+
+      function onPointerDown(event) {
+        if (event.target.closest('.interactive')) return;
+        activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+        cameraStage.setPointerCapture?.(event.pointerId);
+        if (activePointers.size === 1) gestureStart = { y: event.clientY, zoom: zoomValue };
+        if (activePointers.size === 2) {
+          const [a, b] = [...activePointers.values()];
+          pinchStart = { distance: Math.hypot(a.x - b.x, a.y - b.y), zoom: zoomValue };
+          gestureStart = null;
+        }
+      }
+      function onPointerMove(event) {
+        if (!activePointers.has(event.pointerId)) return;
+        activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+        if (activePointers.size >= 2 && pinchStart) {
+          const [a, b] = [...activePointers.values()];
+          const distance = Math.max(10, Math.hypot(a.x - b.x, a.y - b.y));
+          const ratio = distance / pinchStart.distance;
+          setZoom(pinchStart.zoom * ratio);
+          return;
+        }
+        if (activePointers.size === 1 && gestureStart) {
+          const range = zoomMax - zoomMin;
+          const delta = (gestureStart.y - event.clientY) / Math.max(150, cameraStage.clientHeight * .36);
+          setZoom(gestureStart.zoom + delta * range);
+        }
+      }
+      function onPointerUp(event) {
+        activePointers.delete(event.pointerId);
+        if (activePointers.size < 2) pinchStart = null;
+        if (!activePointers.size) gestureStart = null;
+      }
+
+      $('#languageButton').addEventListener('click', toggleLanguage);
+      $('#mobileLanguageButton').addEventListener('click', toggleLanguage);
+      $('#helpButton').addEventListener('click', () => helpDialog.showModal());
+      $('#mobileHelpButton').addEventListener('click', () => helpDialog.showModal());
+      $('#closeHelpButton').addEventListener('click', () => helpDialog.close());
+      $('#historyButton').addEventListener('click', showHistory);
+      $('#closeHistoryButton').addEventListener('click', () => historyDialog.close());
+      $('#imageButton').addEventListener('click', openImagePicker);
+      $('#errorImageButton').addEventListener('click', openImagePicker);
+      $('#retryCameraButton').addEventListener('click', () => startCamera(currentDeviceId));
+      imageInput.addEventListener('change', () => scanImageFile(imageInput.files?.[0]));
+      torchButton.addEventListener('click', toggleTorch);
+      switchCameraButton.addEventListener('click', switchCamera);
+      zoomRange.addEventListener('input', () => setZoom(zoomRange.value));
+      $('#zoomResetButton').addEventListener('click', () => setZoom(clamp(1, zoomMin, zoomMax)));
+      $('#historySearchDesktop').addEventListener('input', renderHistory);
+      $('#historySearchMobile').addEventListener('input', renderHistory);
+      $('#clearHistoryDesktopButton').addEventListener('click', clearHistory);
+      $('#clearHistoryMobileButton').addEventListener('click', clearHistory);
+      $('#closeConfirmButton').addEventListener('click', () => closeConfirm(false));
+      $('#confirmCancelButton').addEventListener('click', () => closeConfirm(false));
+      $('#confirmOkButton').addEventListener('click', () => closeConfirm(true));
+      $('#closeResultButton').addEventListener('click', closeResult);
+      $('#scanAgainButton').addEventListener('click', closeResult);
+      $('#copyResultButton').addEventListener('click', copyResult);
+      $('#shareResultButton').addEventListener('click', shareResult);
+      $('#openResultButton').addEventListener('click', openResult);
+      resultDialog.addEventListener('close', resumeScanning);
+      resultDialog.addEventListener('click', event => {
+        const rect = resultDialog.getBoundingClientRect();
+        if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeResult();
+      });
+      helpDialog.addEventListener('click', event => {
+        const rect = helpDialog.getBoundingClientRect();
+        if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) helpDialog.close();
+      });
+      historyDialog.addEventListener('click', event => {
+        const rect = historyDialog.getBoundingClientRect();
+        if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) historyDialog.close();
+      });
+      confirmDialog.addEventListener('cancel', event => { event.preventDefault(); closeConfirm(false); });
+      confirmDialog.addEventListener('click', event => {
+        const rect = confirmDialog.getBoundingClientRect();
+        if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeConfirm(false);
+      });
+      cameraStage.addEventListener('pointerdown', onPointerDown);
+      cameraStage.addEventListener('pointermove', onPointerMove);
+      cameraStage.addEventListener('pointerup', onPointerUp);
+      cameraStage.addEventListener('pointercancel', onPointerUp);
+      cameraStage.addEventListener('dragover', event => { if (!isMobileLayout()) event.preventDefault(); });
+      cameraStage.addEventListener('drop', event => {
+        if (isMobileLayout()) return;
+        event.preventDefault();
+        const file = [...(event.dataTransfer?.files || [])].find(item => item.type.startsWith('image/'));
+        if (file) scanImageFile(file);
+      });
+      document.addEventListener('visibilitychange', () => { if (!document.hidden && stream) showStatus(t('cameraReady'), 1000); });
+      window.addEventListener('pagehide', stopCamera);
+
+      async function boot() {
+        $('#versionBadge').textContent = `v${APP_CONFIG.version}`;
+        applyLanguage();
+        renderHistory();
+        try { await initializeDecoder(); } catch (error) { console.error(error); showToast(t('qrEngineFailed')); }
+        await startCamera();
+      }
+      boot();
+    })();
+  </script>
+</body>
+</html>
