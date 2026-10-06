@@ -7,7 +7,9 @@ A single-HTML QR code reader optimized for smartphones. It starts the rear camer
 - Camera starts automatically when the page opens and permission is available.
 - Prefer the rear camera and support switching among available cameras.
 - Decode QR codes continuously without sending camera frames outside the browser.
-- Read QR codes from local image files/screenshots.
+- Read QR codes from local image files/screenshots, including one image explicitly supplied by a paste event.
+- Leave text-field, editable-content, and modal-dialog paste untouched; do not read the clipboard asynchronously or fetch pasted URLs.
+- Process one manual image at a time and always show repeated manual results, while retaining the camera duplicate cooldown.
 - Torch control when the active camera exposes it.
 - Zoom control with both a visible slider and vertical swipe gesture; also support pinch zoom.
 - Use optical/hardware camera zoom when available; otherwise use centered digital zoom.
@@ -41,8 +43,9 @@ A single-HTML QR code reader optimized for smartphones. It starts the rear camer
 3. A QR code in the camera view produces a result sheet and a history item.
 4. Scanning pauses while the result sheet is open and resumes after closing it.
 5. A QR code in a selected image can be decoded.
-6. Torch button is enabled only when supported.
-7. Zoom slider works; vertical swipe changes the same zoom value; pinch also works.
-8. Camera switch button is enabled when multiple video inputs are available.
-9. History persists across reloads and can be searched, deleted individually, or cleared.
-10. `scripts/verify-standalone.ps1` passes and `dist/index.html` contains no external script/style URLs.
+6. Pasting an image on the scanner displays its result; unsupported clipboard data remains untouched.
+7. Torch button is enabled only when supported.
+8. Zoom slider works; vertical swipe changes the same zoom value; pinch also works.
+9. Camera switch button is enabled when multiple video inputs are available.
+10. History persists across reloads and can be searched, deleted individually, or cleared.
+11. `scripts/verify-standalone.ps1` passes and `dist/index.html` contains no external script/style URLs.

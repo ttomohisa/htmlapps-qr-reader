@@ -801,7 +801,7 @@
       <h3 data-i18n="helpBasicsTitle">基本操作</h3>
       <ul>
         <li data-i18n="helpStep1">起動するとカメラが開きます。QRコードを中央付近に入れると自動で読み取ります。</li>
-        <li data-i18n="helpStep2">「画像から」でスクリーンショットや保存済み画像のQRコードも読み取れます。</li>
+        <li data-i18n="helpStep2">「画像から」で保存済み画像を選ぶか、スキャナー画面でコピーした画像を貼り付けるとQRコードを読み取れます。入力欄やダイアログでは貼り付け読み取りを行いません。</li>
         <li data-i18n="helpStep3">ズームはスライダーのほか、カメラ画面を上下にスワイプして操作できます。2本指のピンチにも対応します。</li>
       </ul>
       <h3 data-i18n="helpControlsTitle">カメラ操作</h3>
@@ -955,7 +955,7 @@
           cameraUnavailableTitle: 'カメラを使用できません', cameraUnavailableBody: 'カメラの権限を確認するか、画像から読み込んでください。', cameraPermissionDenied: 'カメラの許可がありません。ブラウザーの権限設定を確認してください。', cameraNotSupported: 'この環境ではカメラを起動できません。画像からの読み取りは利用できます。', retryCamera: '再試行',
           flash: 'ライト', fromImage: '画像から', history: '履歴', switchCamera: 'カメラ', gestureHint: '画面を上下にスワイプしてズーム',
           historyLead: '読み取った内容を端末内に保存します。', clearHistory: '履歴を全消去', delete: '削除', cancel: 'キャンセル', confirmTitle: '確認', confirmDeleteHistoryItem: 'この履歴を削除しますか？', confirmDeleteAction: '削除する', confirmClearHistoryAction: '全消去する', searchHistory: '履歴を検索', noHistory: 'まだ履歴はありません。', noSearchResults: '一致する履歴がありません。', confirmClearHistory: '読み取り履歴をすべて削除しますか？',
-          helpTitle: '使い方と注意事項', close: '閉じる', helpBasicsTitle: '基本操作', helpStep1: '起動するとカメラが開きます。QRコードを中央付近に入れると自動で読み取ります。', helpStep2: '「画像から」でスクリーンショットや保存済み画像のQRコードも読み取れます。', helpStep3: 'ズームはスライダーのほか、カメラ画面を上下にスワイプして操作できます。2本指のピンチにも対応します。', helpControlsTitle: 'カメラ操作', helpControlsBody: 'ライトと光学ズームは、端末・カメラ・ブラウザーが対応している場合に使えます。光学ズームが使えない場合はデジタルズームへ自動で切り替えます。', helpHistoryTitle: '履歴', helpHistoryBody: '履歴はこのブラウザーのlocalStorageに保存します。サイトデータを削除すると履歴も消えます。', helpPrivacyTitle: 'プライバシー', helpPrivacyBody: 'カメラ映像・画像・読み取り結果はブラウザー内で処理します。配布用HTMLはQR解析ライブラリも内包し、実行時の外部通信を行いません。', helpNotesTitle: '注意事項', helpNotePermission: 'カメラ利用にはブラウザーの許可が必要です。ブラウザーによってはHTTPSまたはlocalhostでの利用が必要です。', helpNoteLinks: 'QRコード内のURLは自動では開きません。内容を確認してから「開く」を押してください。', helpNoteAccuracy: '小さい・ぼやけた・反射したQRコードは読み取りにくい場合があります。距離やズーム、明るさを調整してください。', helpOffline: 'GitHub Pagesで公開しても、スキャン処理は端末内で完結します。',
+          helpTitle: '使い方と注意事項', close: '閉じる', helpBasicsTitle: '基本操作', helpStep1: '起動するとカメラが開きます。QRコードを中央付近に入れると自動で読み取ります。', helpStep2: '「画像から」で保存済み画像を選ぶか、スキャナー画面でコピーした画像を貼り付けるとQRコードを読み取れます。入力欄やダイアログでは貼り付け読み取りを行いません。', helpStep3: 'ズームはスライダーのほか、カメラ画面を上下にスワイプして操作できます。2本指のピンチにも対応します。', helpControlsTitle: 'カメラ操作', helpControlsBody: 'ライトと光学ズームは、端末・カメラ・ブラウザーが対応している場合に使えます。光学ズームが使えない場合はデジタルズームへ自動で切り替えます。', helpHistoryTitle: '履歴', helpHistoryBody: '履歴はこのブラウザーのlocalStorageに保存します。サイトデータを削除すると履歴も消えます。', helpPrivacyTitle: 'プライバシー', helpPrivacyBody: 'カメラ映像・画像・読み取り結果はブラウザー内で処理します。配布用HTMLはQR解析ライブラリも内包し、実行時の外部通信を行いません。', helpNotesTitle: '注意事項', helpNotePermission: 'カメラ利用にはブラウザーの許可が必要です。ブラウザーによってはHTTPSまたはlocalhostでの利用が必要です。', helpNoteLinks: 'QRコード内のURLは自動では開きません。内容を確認してから「開く」を押してください。', helpNoteAccuracy: '小さい・ぼやけた・反射したQRコードは読み取りにくい場合があります。距離やズーム、明るさを調整してください。', helpOffline: 'GitHub Pagesで公開しても、スキャン処理は端末内で完結します。',
           resultTitle: '読み取り結果', open: '開く', copy: 'コピー', share: '共有', scanAgain: 'スキャンに戻る', copied: 'コピーしました', shareFailed: '共有できませんでした', noQrFound: 'この画像からQRコードを見つけられませんでした', imageReadFailed: '画像を読み込めませんでした', qrEngineFailed: 'QR解析エンジンを読み込めませんでした', historyCleared: '履歴を全消去しました', itemDeleted: '履歴から削除しました', torchUnavailable: 'このカメラではライトを制御できません', zoomOptical: '光学ズーム', zoomDigital: 'デジタルズーム',
           typeUrl: 'URL', typeEmail: 'メール', typePhone: '電話', typeSms: 'SMS', typeGeo: '位置情報', typeWifi: 'Wi-Fi', typeVcard: '連絡先', typeText: 'テキスト', sourceCamera: 'カメラ', sourceImage: '画像',
           wifiSsid: 'SSID', wifiSecurity: '暗号化', wifiPassword: 'パスワード', footer: 'ブラウザー内でQRコードを読み取ります'
@@ -967,7 +967,7 @@
           cameraUnavailableTitle: 'Camera unavailable', cameraUnavailableBody: 'Check camera permission, or scan from an existing image.', cameraPermissionDenied: 'Camera permission was denied. Check your browser permission settings.', cameraNotSupported: 'The camera cannot be started in this environment. Image scanning is still available.', retryCamera: 'Retry',
           flash: 'Torch', fromImage: 'Image', history: 'History', switchCamera: 'Camera', gestureHint: 'Swipe up or down to zoom',
           historyLead: 'Scanned results are saved locally on this device.', clearHistory: 'Clear all history', delete: 'Delete', cancel: 'Cancel', confirmTitle: 'Confirm', confirmDeleteHistoryItem: 'Delete this history item?', confirmDeleteAction: 'Delete', confirmClearHistoryAction: 'Clear all', searchHistory: 'Search history', noHistory: 'No scan history yet.', noSearchResults: 'No matching history.', confirmClearHistory: 'Delete all scan history?',
-          helpTitle: 'How to use & notes', close: 'Close', helpBasicsTitle: 'Basics', helpStep1: 'The camera opens at startup. Point it at a QR code to scan automatically.', helpStep2: 'Use Image to scan a screenshot or an existing photo.', helpStep3: 'Zoom with the slider or swipe vertically on the camera preview. Pinch zoom is also supported.', helpControlsTitle: 'Camera controls', helpControlsBody: 'Torch and optical zoom are available when the device, camera, and browser expose those controls. Digital zoom is used automatically when optical zoom is unavailable.', helpHistoryTitle: 'History', helpHistoryBody: 'History is stored in this browser using localStorage. Clearing site data also removes the history.', helpPrivacyTitle: 'Privacy', helpPrivacyBody: 'Camera frames, images, and decoded results are processed inside the browser. The distributable HTML embeds its QR decoder and makes no runtime network requests.', helpNotesTitle: 'Notes', helpNotePermission: 'Camera access requires browser permission. Depending on the browser, HTTPS or localhost may be required.', helpNoteLinks: 'URLs are never opened automatically. Review the result before choosing Open.', helpNoteAccuracy: 'Very small, blurry, or reflective QR codes can be harder to read. Adjust distance, zoom, and lighting.', helpOffline: 'Even when hosted on GitHub Pages, scanning stays on the device.',
+          helpTitle: 'How to use & notes', close: 'Close', helpBasicsTitle: 'Basics', helpStep1: 'The camera opens at startup. Point it at a QR code to scan automatically.', helpStep2: 'Use Image to select a photo, or paste a copied image on the scanner. Image pasting is inactive in text fields and dialogs.', helpStep3: 'Zoom with the slider or swipe vertically on the camera preview. Pinch zoom is also supported.', helpControlsTitle: 'Camera controls', helpControlsBody: 'Torch and optical zoom are available when the device, camera, and browser expose those controls. Digital zoom is used automatically when optical zoom is unavailable.', helpHistoryTitle: 'History', helpHistoryBody: 'History is stored in this browser using localStorage. Clearing site data also removes the history.', helpPrivacyTitle: 'Privacy', helpPrivacyBody: 'Camera frames, images, and decoded results are processed inside the browser. The distributable HTML embeds its QR decoder and makes no runtime network requests.', helpNotesTitle: 'Notes', helpNotePermission: 'Camera access requires browser permission. Depending on the browser, HTTPS or localhost may be required.', helpNoteLinks: 'URLs are never opened automatically. Review the result before choosing Open.', helpNoteAccuracy: 'Very small, blurry, or reflective QR codes can be harder to read. Adjust distance, zoom, and lighting.', helpOffline: 'Even when hosted on GitHub Pages, scanning stays on the device.',
           resultTitle: 'Scan result', open: 'Open', copy: 'Copy', share: 'Share', scanAgain: 'Back to scanner', copied: 'Copied', shareFailed: 'Could not share', noQrFound: 'No QR code was found in this image', imageReadFailed: 'Could not read the image', qrEngineFailed: 'Could not load the QR decoder', historyCleared: 'All history cleared', itemDeleted: 'Removed from history', torchUnavailable: 'Torch control is unavailable for this camera', zoomOptical: 'Optical zoom', zoomDigital: 'Digital zoom',
           typeUrl: 'URL', typeEmail: 'Email', typePhone: 'Phone', typeSms: 'SMS', typeGeo: 'Location', typeWifi: 'Wi-Fi', typeVcard: 'Contact', typeText: 'Text', sourceCamera: 'Camera', sourceImage: 'Image',
           wifiSsid: 'SSID', wifiSecurity: 'Security', wifiPassword: 'Password', footer: 'QR codes are decoded in your browser'
@@ -1019,6 +1019,8 @@
       let scanLoopId = 0;
       let lastScanAt = 0;
       let scanBusy = false;
+      let imageScanBusy = false;
+      let imageScanSequence = 0;
       let scanningPaused = false;
       let lastDetection = { value: '', at: 0 };
       let currentResult = null;
@@ -1295,7 +1297,7 @@
       }
       function showResult(data, source = 'camera', addToHistoryFlag = true) {
         const now = Date.now();
-        if (addToHistoryFlag && data === lastDetection.value && now - lastDetection.at < 1800) return;
+        if (source === 'camera' && addToHistoryFlag && data === lastDetection.value && now - lastDetection.at < 1800) return;
         lastDetection = { value: data, at: now };
         scanningPaused = true;
         showStatus(t('cameraPaused'));
@@ -1309,8 +1311,8 @@
         if (!resultDialog.open) resultDialog.showModal();
       }
       function resumeScanning() {
-        scanningPaused = false;
-        if (stream) showStatus(t('cameraReady'), 1500);
+        scanningPaused = imageScanBusy || resultDialog.open;
+        if (stream && !scanningPaused) showStatus(t('cameraReady'), 1500);
       }
       function closeResult() { if (resultDialog.open) resultDialog.close(); resumeScanning(); }
       async function copyResult() {
@@ -1383,8 +1385,7 @@
           currentDeviceId = videoTrack?.getSettings?.().deviceId || deviceId || '';
           await enumerateVideoDevices();
           setupCameraCapabilities();
-          showStatus(t('cameraReady'), 1800);
-          scanningPaused = false;
+          resumeScanning();
           lastScanAt = 0;
           scanLoopId = requestAnimationFrame(scanLoop);
           showGestureHintOnce();
@@ -1496,20 +1497,23 @@
       }
       async function scanLoop(timestamp) {
         scanLoopId = requestAnimationFrame(scanLoop);
-        if (!stream || scanningPaused || scanBusy || document.hidden || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
+        if (!stream || scanningPaused || imageScanBusy || scanBusy || document.hidden || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
         if (timestamp - lastScanAt < 125) return;
         lastScanAt = timestamp;
         scanBusy = true;
+        const imageSequence = imageScanSequence;
         try {
           drawVideoFrame();
           const data = await decodeCanvas(scanCanvas, 'dontInvert');
-          if (data) showResult(data, 'camera', true);
+          if (data && !scanningPaused && imageSequence === imageScanSequence) showResult(data, 'camera', true);
         } catch (error) { console.warn('QR scan failed', error); }
         finally { scanBusy = false; }
       }
 
       async function scanImageFile(file) {
-        if (!file) return;
+        if (!file || imageScanBusy) return;
+        imageScanBusy = true;
+        imageScanSequence += 1;
         scanningPaused = true;
         let bitmap = null, objectUrl = '';
         try {
@@ -1530,12 +1534,32 @@
           }
           const data = await decodeCanvas(canvas, 'attemptBoth');
           if (data) showResult(data, 'image', true);
-          else { scanningPaused = false; showToast(t('noQrFound')); }
+          else showToast(t('noQrFound'));
         } catch (error) {
-          console.error(error); scanningPaused = false; showToast(t('imageReadFailed'));
+          console.error(error); showToast(t('imageReadFailed'));
         } finally {
           bitmap?.close?.(); if (objectUrl) URL.revokeObjectURL(objectUrl); imageInput.value = '';
+          imageScanBusy = false;
+          resumeScanning();
         }
+      }
+
+      function pasteImage(event) {
+        if (event.defaultPrevented || imageScanBusy || resultDialog.open || historyDialog.open || helpDialog.open || confirmDialog.open) return;
+        const isEditable = element => element?.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(element?.tagName || '');
+        if (isEditable(document.activeElement) || (event.composedPath?.() || [event.target]).some(isEditable)) return;
+        const clipboard = event.clipboardData;
+        if (!clipboard) return;
+        let file = null;
+        for (const item of clipboard.items || []) {
+          if (item.kind !== 'file' || !/^image\//i.test(item.type)) continue;
+          const candidate = item.getAsFile();
+          if (candidate && /^image\//i.test(candidate.type)) { file = candidate; break; }
+        }
+        if (!file) file = [...(clipboard.files || [])].find(candidate => /^image\//i.test(candidate.type));
+        if (!file) return;
+        event.preventDefault();
+        return scanImageFile(file);
       }
 
       function openImagePicker() { imageInput.click(); }
@@ -1594,6 +1618,7 @@
       $('#errorImageButton').addEventListener('click', openImagePicker);
       $('#retryCameraButton').addEventListener('click', () => startCamera(currentDeviceId));
       imageInput.addEventListener('change', () => scanImageFile(imageInput.files?.[0]));
+      document.addEventListener('paste', pasteImage);
       torchButton.addEventListener('click', toggleTorch);
       switchCameraButton.addEventListener('click', switchCamera);
       zoomRange.addEventListener('input', () => setZoom(zoomRange.value));

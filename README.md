@@ -19,6 +19,7 @@ GitHub Pages only delivers the initial HTML. Camera frames, selected images, QR 
 - Starts the rear camera automatically on launch
 - Continuously scans QR codes from the live camera preview
 - Reads QR codes from screenshots and existing image files
+- Accepts a copied image pasted onto the scanner (Ctrl+V / Cmd+V when the browser provides image data)
 - Uses the browser's native `BarcodeDetector` when available, with embedded `jsQR` as a fallback
 - Torch control when exposed by the active camera and browser
 - Optical camera zoom when available, with digital zoom fallback
@@ -67,8 +68,14 @@ Python, Node.js, and a local web server are not required. The builder uses Windo
 2. Point the rear camera at a QR code. Detection runs automatically.
 3. Review the decoded value in the result sheet.
 4. Use **Open**, **Copy**, or **Share** as needed.
-5. Use **Image** to scan a screenshot or saved photo instead of the camera.
+5. Use **Image** to scan a screenshot or saved photo, or paste a copied image onto the scanner with **Ctrl+V / Cmd+V**.
 6. Open **History** to revisit previously scanned values.
+
+### Pasting an image
+
+Paste on the scanner when no dialog or text field is active. The app decodes only the first usable image supplied by that paste event, using the same local decoder as image import. It does not read clipboard text, fetch pasted URLs, or request clipboard access. Browsers that do not provide an image file for paste can still use **Image**.
+
+Only one image is processed at a time. Close the result before pasting another image. Repeating the same image immediately still shows its result; consecutive identical results within four seconds share one history entry. The camera retains its 1.8-second duplicate cooldown.
 
 ### Camera controls
 
@@ -171,3 +178,9 @@ When supported, the app also uses the browser-native `BarcodeDetector` API witho
 Copyright © 2026 ttomohisa
 
 Licensed under the [MIT License](LICENSE).
+
+### Automated regression checks
+
+With Node.js 22 or later and PowerShell available, run `scripts/check-repository.ps1`. It builds the standalone artifact and runs the Node tests against the source template, checked-in `qr-reader.html`, and generated `dist/index.html`. Regenerate the checked-in HTML after source edits with `./build-standalone.ps1 -OutputPath qr-reader.html`. A normal standalone build does not require Node.js.
+
+The tests decode synthetic QR matrices with the actual embedded jsQR 1.4.0 and check image paste, repeated imports, concurrency, cleanup, history, and URL safety. DOM, canvas, image-codec, and camera boundaries are simulated; physical Android/iOS camera, clipboard, and layout checks are still required for browser-level validation.
