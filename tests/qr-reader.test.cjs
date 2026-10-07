@@ -139,3 +139,87 @@ for (const html of variants) {
     assert.match(fixture(html).api.t('helpStep2'),/paste/i);assert.match(fixture(html,{language:'ja'}).api.t('helpStep2'),/貼り付け/);
   });
 }
+
+// Regressions: changing a language label/target, Help title, or the local badge
+// must fail against the actual applyLanguage function and click handlers.
+for (const html of variants) for (const initial of ['ja', 'en']) {
+  for (const control of ['languageButton', 'mobileLanguageButton']) {
+    test(`${html}: ${initial} ${control} keeps both headers localized through repeated switches`, async () => {
+      const h = fixture(html, {language: initial});
+      h.api.applyLanguage();
+      let language = initial;
+      for (let step = 0; step < 5; step++) {
+        const ja = language === 'ja';
+        assert.equal(h.document.documentElement.lang, language);
+        for (const id of ['languageButton', 'mobileLanguageButton']) {
+          const button = h.node('#' + id);
+          assert.equal(button.textContent, ja ? 'EN' : 'JA');
+          assert.equal(button.getAttribute('aria-label'), ja ? '英語に切り替え' : 'Switch to Japanese');
+          assert.equal(button.title, ja ? '英語に切り替え' : 'Switch to Japanese');
+        }
+        for (const id of ['helpButton', 'mobileHelpButton', 'closeHelpButton']) {
+          const label = id === 'closeHelpButton' ? (ja ? '閉じる' : 'Close') : (ja ? '使い方と注意事項' : 'How to use & notes');
+          assert.equal(h.node('#' + id).getAttribute('aria-label'), label);
+          assert.equal(h.node('#' + id).title, label);
+        }
+        const badge = h.document.querySelectorAll('[data-i18n]').find(el => el.dataset.i18n === 'localBadge');
+        assert.equal(badge.textContent, ja ? '完全ローカル処理' : 'No runtime network');
+        await h.node('#' + control).click();
+        language = ja ? 'en' : 'ja';
+        assert.equal(h.storage.get('htmlapps-qr-reader:language'), language);
+      }
+    });
+  }
+  test(`${html}: ${initial} desktop and mobile Help can repeatedly open and close`, async () => {
+    const h = fixture(html, {language: initial}); h.api.applyLanguage();
+    for (const id of ['helpButton', 'mobileHelpButton', 'helpButton']) {
+      await h.node('#' + id).click(); assert.equal(h.node('#helpDialog').open, true);
+      await h.node('#closeHelpButton').click(); assert.equal(h.node('#helpDialog').open, false);
+    }
+    await h.node('#helpButton').click();
+    await h.node('#helpDialog').emit('click', {clientX: 401, clientY: 801});
+    assert.equal(h.node('#helpDialog').open, false);
+  });
+}
+
+// Camera accessibility labels must follow the selected language even when no
+// camera stream exists. These tests never invoke a camera-permission boundary.
+for (const html of variants) for (const initial of ['ja', 'en']) {
+  for (const [id, jaLabel, enLabel] of [
+    ['video', 'カメラプレビュー', 'Camera preview'],
+    ['zoomResetButton', 'ズームを1倍に戻す', 'Reset zoom to 1×'],
+    ['zoomRange', 'ズーム', 'Zoom'],
+    ['toolbar', 'カメラ操作', 'Camera controls']
+  ]) {
+    test(`${html}: ${initial} camera ${id} accessible label follows repeated switches`, async () => {
+      const h = fixture(html, {language: initial}); h.api.applyLanguage();
+      const element = id === 'toolbar'
+        ? h.document.querySelectorAll('[role]').find(el => el.getAttribute('role') === 'toolbar')
+        : h.node('#' + id);
+      assert.ok(element);
+      let language = initial;
+      for (let step = 0; step < 5; step++) {
+        assert.equal(element.getAttribute('aria-label'), language === 'ja' ? jaLabel : enLabel);
+        await h.node(step % 2 ? '#mobileLanguageButton' : '#languageButton').click();
+        language = language === 'ja' ? 'en' : 'ja';
+      }
+      assert.equal(h.metrics.cameraCalls, 0);
+    });
+  }
+  test(`${html}: ${initial} zoom value description follows language without changing zoom`, async () => {
+    const h = fixture(html, {language: initial}); h.api.applyLanguage();
+    const slider = h.node('#zoomRange'); slider.value = '2.4';
+    await slider.emit('input'); slider.focus();
+    let language = initial;
+    for (let step = 0; step < 5; step++) {
+      assert.equal(slider.value, '2.4');
+      assert.equal(slider.getAttribute('aria-valuetext'), `2.4× · ${language === 'ja' ? 'デジタルズーム' : 'Digital zoom'}`);
+      assert.equal(h.document.activeElement, slider);
+      await h.node('#languageButton').click(); language = language === 'ja' ? 'en' : 'ja';
+    }
+    await h.node('#zoomResetButton').click();
+    assert.equal(slider.value, '1');
+    assert.equal(slider.getAttribute('aria-valuetext'), `1.0× · ${language === 'ja' ? 'デジタルズーム' : 'Digital zoom'}`);
+    assert.equal(h.metrics.cameraCalls, 0);
+  });
+}

@@ -3,7 +3,7 @@
   "name": "QR Reader",
   "nameJa": "QRコードリーダー",
   "slug": "htmlapps-qr-reader",
-  "version": "1.0",
+  "version": "1.0.1",
   "description": "A privacy-friendly QR code reader for camera and image files, packaged as a single self-contained HTML app.",
   "descriptionJa": "カメラと画像からQRコードを読み取る、プライバシー重視の完全内包型単一HTMLアプリです。",
   "defaultLanguage": "auto",

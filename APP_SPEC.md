@@ -15,7 +15,7 @@ A single-HTML QR code reader optimized for smartphones. It starts the rear camer
 - Use optical/hardware camera zoom when available; otherwise use centered digital zoom.
 - Keep scan history in localStorage, searchable and removable.
 - Never auto-open decoded URLs. Show a result sheet first with Open / Copy / Share actions.
-- Japanese and English UI, auto-detected with manual switching.
+- Japanese and English UI, auto-detected with manual switching. Both desktop and mobile language controls display EN / JA with localized target-language labels and tooltips; Help and its Close control are also localized. The Japanese privacy badge reads 完全ローカル処理. Camera preview, zoom, reset, toolbar accessible labels and the zoom value description also follow the selected language without changing the zoom setting.
 - Build to one `dist/index.html` with all third-party code embedded and runtime network blocked by CSP.
 
 ## Mobile UX requirements

@@ -64,6 +64,8 @@ Python, Node.js, and a local web server are not required. The builder uses Windo
 
 ## Usage
 
+Use **EN / JA** in the header to switch languages. Language, Help, and Close tooltips and accessible labels follow the selected language.
+
 1. Open the app and allow camera access.
 2. Point the rear camera at a QR code. Detection runs automatically.
 3. Review the decoded value in the result sheet.

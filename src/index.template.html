@@ -680,8 +680,8 @@
         </div>
       </div>
       <div class="header-actions">
-        <button class="language-button" id="languageButton" type="button">EN</button>
-        <button class="header-icon-button" id="helpButton" type="button" aria-label="使い方と注意事項" data-i18n-aria-label="helpTitle">
+        <button class="language-button" id="languageButton" type="button" aria-label="英語に切り替え" title="英語に切り替え" data-i18n-aria-label="switchLanguage" data-i18n-title="switchLanguage">EN</button>
+        <button class="header-icon-button" id="helpButton" type="button" aria-label="使い方と注意事項" data-i18n-aria-label="helpTitle" title="使い方と注意事項" data-i18n-title="helpTitle">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.3 2c-1 .7-1.9 1.1-1.9 2.5M12 17h.01"/></svg>
         </button>
       </div>
@@ -696,7 +696,7 @@
       </div>
       <div class="local-badge">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 11V8a4 4 0 0 1 8 0v3"/><rect x="5" y="11" width="14" height="9" rx="2"/></svg>
-        <span data-i18n="localBadge">実行時通信なし</span>
+        <span data-i18n="localBadge">完全ローカル処理</span>
       </div>
     </section>
 
@@ -709,14 +709,14 @@
           </div>
         </div>
         <div class="camera-stage" id="cameraStage" style="--digital-zoom:1">
-          <video id="video" autoplay muted playsinline aria-label="カメラプレビュー"></video>
+          <video id="video" autoplay muted playsinline aria-label="カメラプレビュー" data-i18n-aria-label="cameraPreview"></video>
           <canvas id="scanCanvas" class="hidden"></canvas>
 
           <div class="mobile-camera-top">
             <div class="mobile-camera-title" id="mobileTitle">QRコードリーダー</div>
             <div class="mobile-camera-actions">
-              <button class="camera-top-button camera-language interactive" id="mobileLanguageButton" type="button">EN</button>
-              <button class="camera-top-button interactive" id="mobileHelpButton" type="button" aria-label="使い方と注意事項" data-i18n-aria-label="helpTitle">
+              <button class="camera-top-button camera-language interactive" id="mobileLanguageButton" type="button" aria-label="英語に切り替え" title="英語に切り替え" data-i18n-aria-label="switchLanguage" data-i18n-title="switchLanguage">EN</button>
+              <button class="camera-top-button interactive" id="mobileHelpButton" type="button" aria-label="使い方と注意事項" data-i18n-aria-label="helpTitle" title="使い方と注意事項" data-i18n-title="helpTitle">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.3 2c-1 .7-1.9 1.1-1.9 2.5M12 17h.01"/></svg>
               </button>
             </div>
@@ -743,12 +743,12 @@
           <div class="gesture-hint" id="gestureHint" data-i18n="gestureHint">画面を上下にスワイプしてズーム</div>
 
           <div class="zoom-bar" id="zoomBar">
-            <button class="zoom-reset interactive" id="zoomResetButton" type="button" aria-label="ズームを1倍に戻す">1×</button>
-            <input class="zoom-range interactive" id="zoomRange" type="range" min="1" max="4" step="0.1" value="1" aria-label="ズーム">
+            <button class="zoom-reset interactive" id="zoomResetButton" type="button" aria-label="ズームを1倍に戻す" data-i18n-aria-label="resetZoom">1×</button>
+            <input class="zoom-range interactive" id="zoomRange" type="range" min="1" max="4" step="0.1" value="1" aria-label="ズーム" data-i18n-aria-label="zoom">
             <span class="zoom-label" id="zoomLabel">1.0×</span>
           </div>
 
-          <div class="camera-dock" role="toolbar" aria-label="カメラ操作">
+          <div class="camera-dock" role="toolbar" aria-label="カメラ操作" data-i18n-aria-label="helpControlsTitle">
             <button class="camera-action interactive" id="torchButton" type="button" disabled>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 2h6l-1 7h3l-7 13 1-9H7z"/></svg>
               <span data-i18n="flash">ライト</span>
@@ -793,7 +793,7 @@
   <dialog class="help-dialog" id="helpDialog">
     <div class="dialog-header">
       <h2 data-i18n="helpTitle">使い方と注意事項</h2>
-      <button class="dialog-close" id="closeHelpButton" type="button" aria-label="閉じる" data-i18n-aria-label="close">
+      <button class="dialog-close" id="closeHelpButton" type="button" aria-label="閉じる" data-i18n-aria-label="close" title="閉じる" data-i18n-title="close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg>
       </button>
     </div>
@@ -949,8 +949,9 @@
 
       const translations = {
         ja: {
-          appName: 'QRコードリーダー', brandMeta: '単一HTML・端末内処理・履歴保存',
-          introTitle: 'QRコードをすぐ読む', introLead: 'カメラでも画像でも読み取り。結果と履歴はこのブラウザー内だけで扱います。', localBadge: '実行時通信なし',
+          appName: 'QRコードリーダー', switchLanguage: '英語に切り替え', brandMeta: '単一HTML・端末内処理・履歴保存',
+          introTitle: 'QRコードをすぐ読む', introLead: 'カメラでも画像でも読み取り。結果と履歴はこのブラウザー内だけで扱います。', localBadge: '完全ローカル処理',
+          cameraPreview: 'カメラプレビュー', resetZoom: 'ズームを1倍に戻す', zoom: 'ズーム',
           scannerTitle: 'スキャン', scannerLead: 'QRコードを枠に入れると自動で読み取ります。', cameraStarting: 'カメラを起動しています…', cameraReady: 'QRコードをかざしてください', cameraPaused: '結果を確認中', cameraSwitching: 'カメラを切り替えています…',
           cameraUnavailableTitle: 'カメラを使用できません', cameraUnavailableBody: 'カメラの権限を確認するか、画像から読み込んでください。', cameraPermissionDenied: 'カメラの許可がありません。ブラウザーの権限設定を確認してください。', cameraNotSupported: 'この環境ではカメラを起動できません。画像からの読み取りは利用できます。', retryCamera: '再試行',
           flash: 'ライト', fromImage: '画像から', history: '履歴', switchCamera: 'カメラ', gestureHint: '画面を上下にスワイプしてズーム',
@@ -961,8 +962,9 @@
           wifiSsid: 'SSID', wifiSecurity: '暗号化', wifiPassword: 'パスワード', footer: 'ブラウザー内でQRコードを読み取ります'
         },
         en: {
-          appName: 'QR Reader', brandMeta: 'Single HTML · Local processing · History',
+          appName: 'QR Reader', switchLanguage: 'Switch to Japanese', brandMeta: 'Single HTML · Local processing · History',
           introTitle: 'Scan QR codes instantly', introLead: 'Use the camera or an existing image. Results and history stay in this browser.', localBadge: 'No runtime network',
+          cameraPreview: 'Camera preview', resetZoom: 'Reset zoom to 1×', zoom: 'Zoom',
           scannerTitle: 'Scan', scannerLead: 'Place a QR code in view and it will be detected automatically.', cameraStarting: 'Starting camera…', cameraReady: 'Point at a QR code', cameraPaused: 'Reviewing result', cameraSwitching: 'Switching camera…',
           cameraUnavailableTitle: 'Camera unavailable', cameraUnavailableBody: 'Check camera permission, or scan from an existing image.', cameraPermissionDenied: 'Camera permission was denied. Check your browser permission settings.', cameraNotSupported: 'The camera cannot be started in this environment. Image scanning is still available.', retryCamera: 'Retry',
           flash: 'Torch', fromImage: 'Image', history: 'History', switchCamera: 'Camera', gestureHint: 'Swipe up or down to zoom',
@@ -1041,15 +1043,17 @@
       function t(key) { return translations[language]?.[key] ?? translations.en[key] ?? key; }
       function applyLanguage() {
         document.documentElement.lang = language;
+        document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
         document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
         document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
         document.querySelectorAll('[data-i18n-aria-label]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAriaLabel)); });
-        $('#languageButton').textContent = language === 'ja' ? 'EN' : '日本語';
-        $('#mobileLanguageButton').textContent = language === 'ja' ? 'EN' : '日本語';
+        $('#languageButton').textContent = language === 'ja' ? 'EN' : 'JA';
+        $('#mobileLanguageButton').textContent = language === 'ja' ? 'EN' : 'JA';
         $('#brandName').textContent = t('appName');
         $('#mobileTitle').textContent = t('appName');
         $('#footerName').textContent = t('appName');
         document.title = t('appName');
+        updateZoomUi();
         renderHistory();
         if (currentResult) renderResult(currentResult);
       }
