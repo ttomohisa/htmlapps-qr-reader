@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2 - 2026-10-09
+
+- Prepare the maintenance build for an English catalog screenshot, preserving app behavior and the supplied icon.
+
 ## [1.0.1] - 2026-10-07
 
 - Standardized desktop and mobile language controls to EN / JA with localized target-language labels and tooltips.
