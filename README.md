@@ -14,6 +14,8 @@ A smartphone-first, privacy-focused QR code reader that runs entirely in the bro
 
 GitHub Pages only delivers the initial HTML. Camera frames, selected images, QR decoding, result classification, and scan history are processed locally on your device. The app does not upload scanned content or selected images to a server.
 
+[![QR Reader in English with a decoded synthetic QR result](assets/screenshot-en.png)](https://ttomohisa.github.io/htmlapps-qr-reader/)
+
 ## Features
 
 - Starts the rear camera automatically on launch
