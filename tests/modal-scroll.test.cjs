@@ -181,14 +181,14 @@ test('the existing local-processing badge uses only a decorative shield', () => 
   assert.match(badge, /完全ローカル処理/);
 });
 
-test('Japanese and English Help explain the background lock and Help close routes', () => {
+test('Japanese and English Help explain close routes without layout commentary', () => {
   const help = html.match(/<dialog class="help-dialog"[\s\S]*?<\/dialog>/)?.[0];
   assert.match(help || '', /data-i18n="helpDialogScroll"/);
   const translationsText = html.match(/const translations = (\{[\s\S]*?\n      \});/)?.[1];
   assert.ok(translationsText, 'Real translation object remains');
   const translations = vm.runInNewContext(`(${translationsText})`);
-  assert.match(translations.ja.helpDialogScroll, /背景.*スクロール/);
+  assert.doesNotMatch(translations.ja.helpDialogScroll, /背景.*スクロール/);
   assert.match(translations.ja.helpDialogScroll, /閉じる.*Esc.*外側/);
-  assert.match(translations.en.helpDialogScroll, /background.*scroll/i);
+  assert.doesNotMatch(translations.en.helpDialogScroll, /background.*scroll/i);
   assert.match(translations.en.helpDialogScroll, /Close.*Esc.*outside/);
 });

@@ -66,7 +66,7 @@ Python, Node.js, and a local web server are not required. The builder uses Windo
 
 ## Usage
 
-The background does not scroll while a dialog is open. Dismiss Help with Close, Esc, or a click outside it.
+Dismiss Help with Close, Esc, or a click outside it.
 
 Use **EN / JA** in the header to switch languages. Language, Help, and Close tooltips and accessible labels follow the selected language.
 
