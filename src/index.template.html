@@ -46,6 +46,7 @@
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
     }
+    html:has(dialog:modal), body:has(dialog:modal) { overflow: hidden; }
     button, input { font: inherit; }
     button { color: inherit; }
     button:focus-visible, input:focus-visible, summary:focus-visible {
@@ -681,7 +682,7 @@
 </svg>
         </div>
         <div class="brand-copy">
-          <h1 class="brand-name"><span id="brandName">QRコードリーダー</span><span class="version-badge" id="versionBadge">v1.0</span></h1>
+          <h1 class="brand-name"><span id="brandName">QRコードリーダー</span><span class="version-badge" id="versionBadge">v1.0.4</span></h1>
           <p class="brand-meta" data-i18n="brandMeta">単一HTML・端末内処理・履歴保存</p>
         </div>
       </div>
@@ -701,7 +702,7 @@
         <p data-i18n="introLead">カメラでも画像でも読み取り。結果と履歴はこのブラウザー内だけで扱います。</p>
       </div>
       <div class="local-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 11V8a4 4 0 0 1 8 0v3"/><rect x="5" y="11" width="14" height="9" rx="2"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 4 6v5c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V6l-8-3Z"/></svg>
         <span data-i18n="localBadge">完全ローカル処理</span>
       </div>
     </section>
@@ -822,6 +823,7 @@
         <li data-i18n="helpNoteLinks">QRコード内のURLは自動では開きません。内容を確認してから「開く」を押してください。</li>
         <li data-i18n="helpNoteAccuracy">小さい・ぼやけた・反射したQRコードは読み取りにくい場合があります。距離やズーム、明るさを調整してください。</li>
       </ul>
+      <p data-i18n="helpDialogScroll">ダイアログを開いている間は背景がスクロールしません。使い方は「閉じる」、Escキー、外側のクリックで閉じられます。</p>
       <p class="dialog-note" data-i18n="helpOffline">GitHub Pagesで公開しても、スキャン処理は端末内で完結します。</p>
     </div>
   </dialog>
@@ -962,7 +964,7 @@
           cameraUnavailableTitle: 'カメラを使用できません', cameraUnavailableBody: 'カメラの権限を確認するか、画像から読み込んでください。', cameraPermissionDenied: 'カメラの許可がありません。ブラウザーの権限設定を確認してください。', cameraNotSupported: 'この環境ではカメラを起動できません。画像からの読み取りは利用できます。', retryCamera: '再試行',
           flash: 'ライト', fromImage: '画像から', history: '履歴', switchCamera: 'カメラ', gestureHint: '画面を上下にスワイプしてズーム',
           historyLead: '読み取った内容を端末内に保存します。', clearHistory: '履歴を全消去', delete: '削除', cancel: 'キャンセル', confirmTitle: '確認', confirmDeleteHistoryItem: 'この履歴を削除しますか？', confirmDeleteAction: '削除する', confirmClearHistoryAction: '全消去する', searchHistory: '履歴を検索', noHistory: 'まだ履歴はありません。', noSearchResults: '一致する履歴がありません。', confirmClearHistory: '読み取り履歴をすべて削除しますか？',
-          helpTitle: '使い方と注意事項', close: '閉じる', helpBasicsTitle: '基本操作', helpStep1: '起動するとカメラが開きます。QRコードを中央付近に入れると自動で読み取ります。', helpStep2: '「画像から」で保存済み画像を選ぶか、スキャナー画面でコピーした画像を貼り付けるとQRコードを読み取れます。入力欄やダイアログでは貼り付け読み取りを行いません。', helpStep3: 'ズームはスライダーのほか、カメラ画面を上下にスワイプして操作できます。2本指のピンチにも対応します。', helpControlsTitle: 'カメラ操作', helpControlsBody: 'ライトと光学ズームは、端末・カメラ・ブラウザーが対応している場合に使えます。光学ズームが使えない場合はデジタルズームへ自動で切り替えます。', helpHistoryTitle: '履歴', helpHistoryBody: '履歴はこのブラウザーのlocalStorageに保存します。サイトデータを削除すると履歴も消えます。', helpPrivacyTitle: 'プライバシー', helpPrivacyBody: 'カメラ映像・画像・読み取り結果はブラウザー内で処理します。配布用HTMLはQR解析ライブラリも内包し、実行時の外部通信を行いません。', helpNotesTitle: '注意事項', helpNotePermission: 'カメラ利用にはブラウザーの許可が必要です。ブラウザーによってはHTTPSまたはlocalhostでの利用が必要です。', helpNoteLinks: 'QRコード内のURLは自動では開きません。内容を確認してから「開く」を押してください。', helpNoteAccuracy: '小さい・ぼやけた・反射したQRコードは読み取りにくい場合があります。距離やズーム、明るさを調整してください。', helpOffline: 'GitHub Pagesで公開しても、スキャン処理は端末内で完結します。',
+          helpDialogScroll: 'ダイアログを開いている間は背景がスクロールしません。使い方は「閉じる」、Escキー、外側のクリックで閉じられます。', helpTitle: '使い方と注意事項', close: '閉じる', helpBasicsTitle: '基本操作', helpStep1: '起動するとカメラが開きます。QRコードを中央付近に入れると自動で読み取ります。', helpStep2: '「画像から」で保存済み画像を選ぶか、スキャナー画面でコピーした画像を貼り付けるとQRコードを読み取れます。入力欄やダイアログでは貼り付け読み取りを行いません。', helpStep3: 'ズームはスライダーのほか、カメラ画面を上下にスワイプして操作できます。2本指のピンチにも対応します。', helpControlsTitle: 'カメラ操作', helpControlsBody: 'ライトと光学ズームは、端末・カメラ・ブラウザーが対応している場合に使えます。光学ズームが使えない場合はデジタルズームへ自動で切り替えます。', helpHistoryTitle: '履歴', helpHistoryBody: '履歴はこのブラウザーのlocalStorageに保存します。サイトデータを削除すると履歴も消えます。', helpPrivacyTitle: 'プライバシー', helpPrivacyBody: 'カメラ映像・画像・読み取り結果はブラウザー内で処理します。配布用HTMLはQR解析ライブラリも内包し、実行時の外部通信を行いません。', helpNotesTitle: '注意事項', helpNotePermission: 'カメラ利用にはブラウザーの許可が必要です。ブラウザーによってはHTTPSまたはlocalhostでの利用が必要です。', helpNoteLinks: 'QRコード内のURLは自動では開きません。内容を確認してから「開く」を押してください。', helpNoteAccuracy: '小さい・ぼやけた・反射したQRコードは読み取りにくい場合があります。距離やズーム、明るさを調整してください。', helpOffline: 'GitHub Pagesで公開しても、スキャン処理は端末内で完結します。',
           resultTitle: '読み取り結果', open: '開く', copy: 'コピー', share: '共有', scanAgain: 'スキャンに戻る', copied: 'コピーしました', shareFailed: '共有できませんでした', noQrFound: 'この画像からQRコードを見つけられませんでした', imageReadFailed: '画像を読み込めませんでした', qrEngineFailed: 'QR解析エンジンを読み込めませんでした', historyCleared: '履歴を全消去しました', itemDeleted: '履歴から削除しました', torchUnavailable: 'このカメラではライトを制御できません', zoomOptical: '光学ズーム', zoomDigital: 'デジタルズーム',
           typeUrl: 'URL', typeEmail: 'メール', typePhone: '電話', typeSms: 'SMS', typeGeo: '位置情報', typeWifi: 'Wi-Fi', typeVcard: '連絡先', typeText: 'テキスト', sourceCamera: 'カメラ', sourceImage: '画像',
           wifiSsid: 'SSID', wifiSecurity: '暗号化', wifiPassword: 'パスワード', footer: 'ブラウザー内でQRコードを読み取ります'
@@ -975,7 +977,7 @@
           cameraUnavailableTitle: 'Camera unavailable', cameraUnavailableBody: 'Check camera permission, or scan from an existing image.', cameraPermissionDenied: 'Camera permission was denied. Check your browser permission settings.', cameraNotSupported: 'The camera cannot be started in this environment. Image scanning is still available.', retryCamera: 'Retry',
           flash: 'Torch', fromImage: 'Image', history: 'History', switchCamera: 'Camera', gestureHint: 'Swipe up or down to zoom',
           historyLead: 'Scanned results are saved locally on this device.', clearHistory: 'Clear all history', delete: 'Delete', cancel: 'Cancel', confirmTitle: 'Confirm', confirmDeleteHistoryItem: 'Delete this history item?', confirmDeleteAction: 'Delete', confirmClearHistoryAction: 'Clear all', searchHistory: 'Search history', noHistory: 'No scan history yet.', noSearchResults: 'No matching history.', confirmClearHistory: 'Delete all scan history?',
-          helpTitle: 'How to use & notes', close: 'Close', helpBasicsTitle: 'Basics', helpStep1: 'The camera opens at startup. Point it at a QR code to scan automatically.', helpStep2: 'Use Image to select a photo, or paste a copied image on the scanner. Image pasting is inactive in text fields and dialogs.', helpStep3: 'Zoom with the slider or swipe vertically on the camera preview. Pinch zoom is also supported.', helpControlsTitle: 'Camera controls', helpControlsBody: 'Torch and optical zoom are available when the device, camera, and browser expose those controls. Digital zoom is used automatically when optical zoom is unavailable.', helpHistoryTitle: 'History', helpHistoryBody: 'History is stored in this browser using localStorage. Clearing site data also removes the history.', helpPrivacyTitle: 'Privacy', helpPrivacyBody: 'Camera frames, images, and decoded results are processed inside the browser. The distributable HTML embeds its QR decoder and makes no runtime network requests.', helpNotesTitle: 'Notes', helpNotePermission: 'Camera access requires browser permission. Depending on the browser, HTTPS or localhost may be required.', helpNoteLinks: 'URLs are never opened automatically. Review the result before choosing Open.', helpNoteAccuracy: 'Very small, blurry, or reflective QR codes can be harder to read. Adjust distance, zoom, and lighting.', helpOffline: 'Even when hosted on GitHub Pages, scanning stays on the device.',
+          helpDialogScroll: 'The background does not scroll while a dialog is open. Dismiss Help with Close, Esc, or a click outside it.', helpTitle: 'How to use & notes', close: 'Close', helpBasicsTitle: 'Basics', helpStep1: 'The camera opens at startup. Point it at a QR code to scan automatically.', helpStep2: 'Use Image to select a photo, or paste a copied image on the scanner. Image pasting is inactive in text fields and dialogs.', helpStep3: 'Zoom with the slider or swipe vertically on the camera preview. Pinch zoom is also supported.', helpControlsTitle: 'Camera controls', helpControlsBody: 'Torch and optical zoom are available when the device, camera, and browser expose those controls. Digital zoom is used automatically when optical zoom is unavailable.', helpHistoryTitle: 'History', helpHistoryBody: 'History is stored in this browser using localStorage. Clearing site data also removes the history.', helpPrivacyTitle: 'Privacy', helpPrivacyBody: 'Camera frames, images, and decoded results are processed inside the browser. The distributable HTML embeds its QR decoder and makes no runtime network requests.', helpNotesTitle: 'Notes', helpNotePermission: 'Camera access requires browser permission. Depending on the browser, HTTPS or localhost may be required.', helpNoteLinks: 'URLs are never opened automatically. Review the result before choosing Open.', helpNoteAccuracy: 'Very small, blurry, or reflective QR codes can be harder to read. Adjust distance, zoom, and lighting.', helpOffline: 'Even when hosted on GitHub Pages, scanning stays on the device.',
           resultTitle: 'Scan result', open: 'Open', copy: 'Copy', share: 'Share', scanAgain: 'Back to scanner', copied: 'Copied', shareFailed: 'Could not share', noQrFound: 'No QR code was found in this image', imageReadFailed: 'Could not read the image', qrEngineFailed: 'Could not load the QR decoder', historyCleared: 'All history cleared', itemDeleted: 'Removed from history', torchUnavailable: 'Torch control is unavailable for this camera', zoomOptical: 'Optical zoom', zoomDigital: 'Digital zoom',
           typeUrl: 'URL', typeEmail: 'Email', typePhone: 'Phone', typeSms: 'SMS', typeGeo: 'Location', typeWifi: 'Wi-Fi', typeVcard: 'Contact', typeText: 'Text', sourceCamera: 'Camera', sourceImage: 'Image',
           wifiSsid: 'SSID', wifiSecurity: 'Security', wifiPassword: 'Password', footer: 'QR codes are decoded in your browser'
