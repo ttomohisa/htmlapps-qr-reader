@@ -58,6 +58,7 @@ test('repository validation and both workflows require the canonical gate', () =
 });
 
 function assertPreviewArtifact(yaml) {
+  yaml = yaml.replace(/\r\n/g, '\n');
   const block = yaml.match(/      - name: Upload standalone build artifact\n([\s\S]*?)(?=\n      - name:|$)/)?.[0];
   assert.ok(block, 'PR validation must preserve its official build artifacts');
   assert.match(block, /uses: actions\/upload-artifact@v7/);
@@ -70,22 +71,25 @@ function assertPreviewArtifact(yaml) {
   assert.ok(yaml.indexOf(block) > yaml.indexOf('run: ./scripts/check-repository.ps1'), 'Upload only after successful build and validation');
   assert.ok(yaml.indexOf(block) < yaml.indexOf('- name: Check Cloudflare preview credentials'), 'Preserve official build bytes independently of preview credentials');
 }
-test('PR validation preserves official build bytes under the exact PR head SHA', () => {
-  assertPreviewArtifact(fs.readFileSync(path.join(root, '.github/workflows/preview.yml'), 'utf8'));
-});
-test('PR artifact contract rejects missing upload, wrong commit, missing file and ignored errors', () => {
-  const yaml = fs.readFileSync(path.join(root, '.github/workflows/preview.yml'), 'utf8');
-  assertPreviewArtifact(yaml);
-  const mutations = [
-    yaml.replace('name: Upload standalone build artifact', 'name: Missing artifact gate'),
-    yaml.replace('name: qr-reader-${{ github.event.pull_request.head.sha }}', 'name: qr-reader-${{ github.sha }}'),
-    yaml.replace('            dist/dependency-manifest.json\n', ''),
-    yaml.replace('if-no-files-found: error', 'if-no-files-found: warn'),
-    yaml.replace('          include-hidden-files: true\n', ''),
-    yaml.replace('        uses: actions/upload-artifact@v7', '        continue-on-error: true\n        uses: actions/upload-artifact@v7')
-  ];
-  for (const mutation of mutations) {
-    assert.notEqual(mutation, yaml, 'Each mutation changes the artifact contract');
-    assert.throws(() => assertPreviewArtifact(mutation));
-  }
-});
+for (const [lineEnding, newline] of [['LF', '\n'], ['CRLF', '\r\n']]) {
+  test(`PR validation preserves official build bytes under the exact PR head SHA (${lineEnding})`, () => {
+    const yaml = fs.readFileSync(path.join(root, '.github/workflows/preview.yml'), 'utf8').replace(/\r?\n/g, newline);
+    assertPreviewArtifact(yaml);
+  });
+  test(`PR artifact contract rejects missing upload, wrong commit, missing file and ignored errors (${lineEnding})`, () => {
+    const yaml = fs.readFileSync(path.join(root, '.github/workflows/preview.yml'), 'utf8').replace(/\r?\n/g, newline);
+    assertPreviewArtifact(yaml);
+    const mutations = [
+      yaml.replace('name: Upload standalone build artifact', 'name: Missing artifact gate'),
+      yaml.replace('name: qr-reader-${{ github.event.pull_request.head.sha }}', 'name: qr-reader-${{ github.sha }}'),
+      yaml.replace(`            dist/dependency-manifest.json${newline}`, ''),
+      yaml.replace('if-no-files-found: error', 'if-no-files-found: warn'),
+      yaml.replace(`          include-hidden-files: true${newline}`, ''),
+      yaml.replace('        uses: actions/upload-artifact@v7', `        continue-on-error: true${newline}        uses: actions/upload-artifact@v7`)
+    ];
+    for (const mutation of mutations) {
+      assert.notEqual(mutation, yaml, 'Each mutation changes the artifact contract');
+      assert.throws(() => assertPreviewArtifact(mutation));
+    }
+  });
+}
