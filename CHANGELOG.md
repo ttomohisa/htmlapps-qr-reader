@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4 - 2026-10-11
+
+- Prevent background-page scrolling while a native modal is open, preserving existing dialog geometry and close behavior.
+- Use a shield for the existing local-processing badge and add Japanese / English Help guidance.
+- Add source and generated-artifact modal regressions to the canonical validation path.
+
 ## 1.0.3 - 2026-10-09
 
 - Normalize the app icon background to `#16624f` with 25% corner radii, and keep the asset, header and favicon consistent without changing the artwork.

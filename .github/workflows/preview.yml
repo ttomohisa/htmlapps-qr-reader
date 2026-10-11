@@ -48,6 +48,18 @@ jobs:
         shell: pwsh
         run: ./scripts/check-repository.ps1
 
+      - name: Upload standalone build artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: qr-reader-${{ github.event.pull_request.head.sha }}
+          path: |
+            dist/index.html
+            dist/dependency-manifest.json
+            dist/.nojekyll
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Check Cloudflare preview credentials
         id: cloudflare
         shell: pwsh

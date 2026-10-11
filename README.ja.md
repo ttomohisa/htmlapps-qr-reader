@@ -64,6 +64,8 @@ Python、Node.js、ローカルWebサーバーは不要です。Windows標準の
 
 ## 使い方
 
+ダイアログを開いている間は背景がスクロールしません。使い方は「閉じる」、Escキー、外側のクリックで閉じられます。
+
 ヘッダーの **EN / JA** で言語を切り替えます。言語切り替え・使い方・閉じるボタンのツールチップと読み上げ用ラベルも選択した言語に合わせて変わります。
 
 1. アプリを開き、カメラの使用を許可します。
@@ -186,3 +188,7 @@ Copyright © 2026 ttomohisa
 Node.js 22以降とPowerShellを用意し、`scripts/check-repository.ps1` を実行します。ビルド後、ソーステンプレート・リポジトリの `qr-reader.html`・生成した `dist/index.html` に対してNodeテストを実行します。ソース変更後の `qr-reader.html` は `./build-standalone.ps1 -OutputPath qr-reader.html` で再生成してください。通常の単一HTMLビルドにはNode.jsは不要です。
 
 合成QRデータを実際に内包したjsQR 1.4.0で解析し、画像貼り付け・再読み取り・同時処理・解放処理・履歴・URL安全性を確認します。DOM、canvas、画像コーデック、カメラの境界はテスト用の代替であり、Android/iOS実機でのカメラ・クリップボード・表示確認は別途必要です。
+
+### モーダル表示の回帰確認
+
+リポジトリ検証にはNode.js 22以降とPowerShellを使います。`dist/index.html` と `qr-reader.html` を生成後、`node scripts/test-regressions.cjs` で全ソーステストと両配布HTMLのアプリ回帰テストを実行します。失敗や必須ツールの不足はエラーになります。`--source-only` は再ビルドせず全ソーステストを実行します。単一HTMLのビルド自体にNode.jsは不要です。実際のスクロール・タッチ・フォーカス・カメラはブラウザーで別途確認します。

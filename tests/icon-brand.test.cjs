@@ -23,7 +23,7 @@ test('canonical icon has exact brand color and quarter-side corner radii', () =>
  assert.equal(Number(rect.rx), Number(rect.width) / 4);
  assert.equal(Number(rect.ry ?? rect.rx), Number(rect.height) / 4);
 });
-const files = ["src/index.template.html", "dist/index.html", "qr-reader.html"];
+const files = process.env.QR_TEST_HTML ? [process.env.QR_TEST_HTML] : ["src/index.template.html", "dist/index.html", "qr-reader.html"];
 for (const file of files) test(`${file} keeps canonical header and favicon artwork`, () => {
  const html = read(file);
  const mark = html.match(/<div class="brand-mark"[^>]*>([\s\S]*?)<\/div>/);

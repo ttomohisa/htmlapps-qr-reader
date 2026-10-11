@@ -7,6 +7,6 @@ foreach ($relative in $required) { if (-not (Test-Path (Join-Path $Root $relativ
 $arguments = @{}; if ($ForceDownload) { $arguments.ForceDownload = $true }
 & (Join-Path $Root 'build-standalone.ps1') @arguments
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw 'Node.js 22 or later is required for repository regression tests. The standalone build itself does not require Node.js.' }
-& node --test (Join-Path $Root 'tests/qr-reader.test.cjs')
+& node (Join-Path $Root 'scripts/test-regressions.cjs')
 if ($LASTEXITCODE -ne 0) { throw 'QR Reader regression tests failed.' }
 Write-Host '[OK] Repository check passed.' -ForegroundColor Green

@@ -49,3 +49,8 @@ A single-HTML QR code reader optimized for smartphones. It starts the rear camer
 9. Camera switch button is enabled when multiple video inputs are available.
 10. History persists across reloads and can be searched, deleted individually, or cleared.
 11. `scripts/verify-standalone.ps1` passes and `dist/index.html` contains no external script/style URLs.
+
+## Modal scrolling (1.0.4)
+
+- Lock page-root scrolling only while a native modal dialog is open; preserve all existing dialog sizes, internal scrolling and close behavior.
+- Keep the existing local-processing badge wording and use a decorative shield. Help explains the background lock and Help dismissal in Japanese and English.

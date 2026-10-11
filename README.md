@@ -66,6 +66,8 @@ Python, Node.js, and a local web server are not required. The builder uses Windo
 
 ## Usage
 
+The background does not scroll while a dialog is open. Dismiss Help with Close, Esc, or a click outside it.
+
 Use **EN / JA** in the header to switch languages. Language, Help, and Close tooltips and accessible labels follow the selected language.
 
 1. Open the app and allow camera access.
@@ -188,3 +190,7 @@ Licensed under the [MIT License](LICENSE).
 With Node.js 22 or later and PowerShell available, run `scripts/check-repository.ps1`. It builds the standalone artifact and runs the Node tests against the source template, checked-in `qr-reader.html`, and generated `dist/index.html`. Regenerate the checked-in HTML after source edits with `./build-standalone.ps1 -OutputPath qr-reader.html`. A normal standalone build does not require Node.js.
 
 The tests decode synthetic QR matrices with the actual embedded jsQR 1.4.0 and check image paste, repeated imports, concurrency, cleanup, history, and URL safety. DOM, canvas, image-codec, and camera boundaries are simulated; physical Android/iOS camera, clipboard, and layout checks are still required for browser-level validation.
+
+### Regression validation
+
+Use Node.js 22 or later and PowerShell for repository validation. After building both `dist/index.html` and `qr-reader.html`, run `node scripts/test-regressions.cjs`. The gate runs all source tests and the application regressions against both release copies, failing on any test or missing prerequisite. `--source-only` runs the complete source suite without rebuilding. The standalone build remains Node-free. Native scrolling, touch, focus and camera checks still require a real browser.
