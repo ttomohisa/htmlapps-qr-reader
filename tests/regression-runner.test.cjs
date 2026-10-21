@@ -59,17 +59,17 @@ test('repository validation and both workflows require the canonical gate', () =
 
 function assertPreviewArtifact(yaml) {
   yaml = yaml.replace(/\r\n/g, '\n');
-  const block = yaml.match(/      - name: Upload standalone build artifact\n([\s\S]*?)(?=\n      - name:|$)/)?.[0];
+  const block = yaml.match(/^([ ]*)- name: Upload standalone build artifact\n([\s\S]*?)(?=^\1- name:|(?![\s\S]))/m)?.[0];
   assert.ok(block, 'PR validation must preserve its official build artifacts');
-  assert.match(block, /uses: actions\/upload-artifact@v7/);
+  assert.match(block, /uses: actions\/upload-artifact@(?:v7|cf430e030ddbb5b0abf93d22962f4752f3646cd9)/);
   assert.match(block, /name: qr-reader-\$\{\{ github\.event\.pull_request\.head\.sha \}\}/);
-  assert.match(block, /path: \|\n            dist\/index\.html\n            dist\/dependency-manifest\.json\n            dist\/\.nojekyll\n/);
+  assert.match(block, /path: \|\n\s+dist\/index\.html\n\s+dist\/dependency-manifest\.json\n\s+dist\/\.nojekyll\n/);
   assert.match(block, /include-hidden-files: true/, 'The explicitly listed .nojekyll must be included');
   assert.match(block, /if-no-files-found: error/);
   assert.match(block, /retention-days: 14/);
   assert.doesNotMatch(block, /^\s*(?:if|continue-on-error):/m, 'Use the default success condition without hiding failures');
   assert.ok(yaml.indexOf(block) > yaml.indexOf('run: ./scripts/check-repository.ps1'), 'Upload only after successful build and validation');
-  assert.ok(yaml.indexOf(block) < yaml.indexOf('- name: Check Cloudflare preview credentials'), 'Preserve official build bytes independently of preview credentials');
+  assert.doesNotMatch(yaml, /secrets\.|CLOUDFLARE_API_TOKEN/, 'Official build bytes are produced without preview credentials');
 }
 for (const [lineEnding, newline] of [['LF', '\n'], ['CRLF', '\r\n']]) {
   test(`PR validation preserves official build bytes under the exact PR head SHA (${lineEnding})`, () => {
@@ -82,10 +82,10 @@ for (const [lineEnding, newline] of [['LF', '\n'], ['CRLF', '\r\n']]) {
     const mutations = [
       yaml.replace('name: Upload standalone build artifact', 'name: Missing artifact gate'),
       yaml.replace('name: qr-reader-${{ github.event.pull_request.head.sha }}', 'name: qr-reader-${{ github.sha }}'),
-      yaml.replace(`            dist/dependency-manifest.json${newline}`, ''),
+      yaml.replace(/^[ ]+dist\/dependency-manifest\.json\r?\n/m, ''),
       yaml.replace('if-no-files-found: error', 'if-no-files-found: warn'),
-      yaml.replace(`          include-hidden-files: true${newline}`, ''),
-      yaml.replace('        uses: actions/upload-artifact@v7', `        continue-on-error: true${newline}        uses: actions/upload-artifact@v7`)
+      yaml.replace(/^[ ]+include-hidden-files: true\r?\n/m, ''),
+      yaml.replace(/^([ ]*)(uses: actions\/upload-artifact@[^\r\n]+)/m, `$1continue-on-error: true${newline}$1$2`)
     ];
     for (const mutation of mutations) {
       assert.notEqual(mutation, yaml, 'Each mutation changes the artifact contract');
