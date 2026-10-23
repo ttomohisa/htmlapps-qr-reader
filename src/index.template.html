@@ -522,6 +522,9 @@
     .dialog-close:hover { background: var(--surface-hover); }
     .dialog-close svg { width: 19px; height: 19px; }
     .help-dialog { width: min(640px, calc(100% - 28px)); max-height: min(780px, calc(100dvh - 28px)); overflow: hidden; }
+    #helpDialog[open] { display: flex; flex-direction: column; }
+    #helpDialog .dialog-header { flex: 0 0 auto; }
+    #helpDialog .dialog-body { flex: 1 1 auto; min-height: 0; max-height: none; overflow: auto; overscroll-behavior: contain; }
     .dialog-body { padding: 20px 20px 28px; overflow: auto; max-height: calc(100dvh - 100px); }
     .dialog-body h3 { margin: 24px 0 7px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 14px; }
     .dialog-body h3:first-child { margin-top: 0; padding-top: 0; border-top: 0; }

@@ -36,8 +36,8 @@ test('scanner/reception root locks remain unchanged and non-modal dialogs add no
   assert.deepEqual(existingLocks, [["html", "width:100%;height:100%;overflow:hidden;background:#0b0e0d;overscroll-behavior:none;"], ["body", "width:100%;height:100%;overflow:hidden;background:#0b0e0d;overscroll-behavior:none;"]], 'Preserve existing mobile/reception locks without adding [open] or unconditional locks');
 });
 
-test('all existing dialog, result and confirmation geometry remains unchanged', () => {
-  const geometry = rules.filter(rule => /dialog|\.(?:result-body|confirm-body|confirm-actions)\b/.test(rule.selector) && !rule.selector.includes(':has(dialog:modal)'))
+test('dialog geometry preserves all other dialogs and bounds the Help body', () => {
+  const geometry = rules.filter(rule => /dialog|#helpDialog|\.(?:result-body|confirm-body|confirm-actions)\b/.test(rule.selector) && !rule.selector.includes(':has(dialog:modal)'))
     .map(rule => [compact(rule.selector), compact(rule.body)]);
   assert.deepEqual(geometry, [
   [
@@ -72,6 +72,9 @@ test('all existing dialog, result and confirmation geometry remains unchanged', 
     ".help-dialog",
     "width:min(640px,calc(100%-28px));max-height:min(780px,calc(100dvh-28px));overflow:hidden;"
   ],
+  ["#helpDialog[open]", "display:flex;flex-direction:column;"],
+  ["#helpDialog.dialog-header", "flex:00auto;"],
+  ["#helpDialog.dialog-body", "flex:11auto;min-height:0;max-height:none;overflow:auto;overscroll-behavior:contain;"],
   [
     ".dialog-body",
     "padding:20px20px28px;overflow:auto;max-height:calc(100dvh-100px);"
