@@ -163,7 +163,7 @@ for (const html of variants) for (const initial of ['ja', 'en']) {
           assert.equal(h.node('#' + id).title, label);
         }
         const badge = h.document.querySelectorAll('[data-i18n]').find(el => el.dataset.i18n === 'localBadge');
-        assert.equal(badge.textContent, ja ? '完全ローカル処理' : 'No runtime network');
+        assert.equal(badge.textContent, ja ? '完全ローカル処理' : 'Fully local processing');
         await h.node('#' + control).click();
         language = ja ? 'en' : 'ja';
         assert.equal(h.storage.get('htmlapps-qr-reader:language'), language);

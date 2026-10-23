@@ -54,3 +54,7 @@ A single-HTML QR code reader optimized for smartphones. It starts the rear camer
 
 - Lock page-root scrolling only while a native modal dialog is open; preserve all existing dialog sizes, internal scrolling and close behavior.
 - Keep the existing local-processing badge wording and use a decorative shield. Help explains dismissal in Japanese and English without implementation commentary.
+
+## Shared local-processing wording
+
+The Japanese label 完全ローカル処理 uses the English text Fully local processing. Preserve the existing responsive visibility, functional bottom controls, and Help behavior. Detailed privacy/network explanations are unchanged.
