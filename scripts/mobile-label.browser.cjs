@@ -7,7 +7,7 @@ const cfg={"language": "#languageButton", "phoneLanguage": "#mobileLanguageButto
 const evidence=path.resolve('test-results/mobile-label');
 async function main(){
  fs.mkdirSync(evidence,{recursive:true});const browser=await chromium.launch();
- try{for(const language of ['ja','en'])for(const [width,height]of [[1360,900],[761,568],[760,568],[320,568],[393,252]]){
+ try{for(const language of ['ja','en'])for(const [width,height]of [[1360,900],[761,568],[760,568],[320,568],[360,640],[390,844],[393,252]]){
  const context=await browser.newContext({viewport:{width,height},locale:language,reducedMotion:'reduce'});
  // Exercise the app's real no-camera fallback without requesting device access.
  if(cfg.noCamera)await context.addInitScript(()=>Object.defineProperty(navigator,'mediaDevices',{value:undefined}));
@@ -18,6 +18,10 @@ async function main(){
  const langButton=width<=760&&cfg.phoneLanguage?cfg.phoneLanguage:cfg.language;
  await page.locator(langButton).waitFor();
  if(await page.locator('html').getAttribute('lang')!==language)await page.locator(langButton).click();
+ const headerVersion=page.locator(width<=760?'#mobileVersionBadge':'#versionBadge');
+ assert.equal(await headerVersion.isVisible(),true,label+': header version is visible');
+ assert.equal((await headerVersion.textContent()).trim(),'v'+JSON.parse(fs.readFileSync(path.resolve(__dirname,'../app.config.json'),'utf8')).version,label+': current version');
+ assert.ok(await headerVersion.evaluate(el=>{const r=el.getBoundingClientRect();if(r.left<0||r.right>innerWidth||el.scrollWidth>el.clientWidth+1)return false;for(let p=el.parentElement;p;p=p.parentElement){if(/hidden|clip/.test(getComputedStyle(p).overflowX)){const b=p.getBoundingClientRect();if(r.left<b.left-1||r.right>b.right+1)return false;}}return true;}),label+': version is not clipped');
  const badge=page.locator(cfg.badge);
  assert.equal((await badge.textContent()).trim(),language==='ja'?'完全ローカル処理':'Fully local processing');
  assert.equal(await badge.isVisible(),width>cfg.hide,label+': existing badge visibility');
@@ -27,7 +31,9 @@ async function main(){
  else assert.equal(await page.locator('body > footer').count(),0,'No informational footer is added');
  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
  if([1360,320].includes(width))await page.screenshot({path:path.join(evidence,label+'.png')});
- await page.locator(width<=760&&cfg.phoneHelp?cfg.phoneHelp:cfg.help).click();
+ const helpControl=page.locator(width<=760&&cfg.phoneHelp?cfg.phoneHelp:cfg.help);
+ assert.equal(await helpControl.locator('svg path').evaluate(el=>getComputedStyle(el).strokeLinecap),'round',label+': Help question-mark dot has visible round caps');
+ await helpControl.click();
  await page.locator(cfg.scroll).evaluate(el=>{el.scrollTop=el.scrollHeight;});
  const bounds=await page.locator(cfg.end).evaluate(el=>{const r=el.getBoundingClientRect();let top=0,bottom=innerHeight;for(let p=el.parentElement;p;p=p.parentElement){const s=getComputedStyle(p);if(/auto|scroll|hidden|clip/.test(s.overflowY)){const b=p.getBoundingClientRect();top=Math.max(top,b.top);bottom=Math.min(bottom,b.bottom);}}return{top:r.top,bottom:r.bottom,clipTop:top,clipBottom:bottom};});
  assert.ok(bounds.top>=bounds.clipTop-1&&bounds.bottom<=bounds.clipBottom+1,label+': Help end reachable '+JSON.stringify(bounds));

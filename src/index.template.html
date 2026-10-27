@@ -211,8 +211,11 @@
       padding: calc(env(safe-area-inset-top) + 12px) 16px 10px;
       pointer-events: none;
     }
-    .mobile-camera-title { font-size: 16px; font-weight: 760; letter-spacing: -.01em; text-shadow: 0 1px 12px rgba(0,0,0,.55); }
-    .mobile-camera-actions { display: flex; align-items: center; gap: 16px; pointer-events: auto; }
+    .mobile-camera-title { min-width: 0; display: flex; align-items: center; font-size: 16px; font-weight: 760; letter-spacing: -.01em; text-shadow: 0 1px 12px rgba(0,0,0,.55); }
+    #mobileTitle { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mobile-camera-title .version-badge { flex: 0 0 auto; margin-left: 5px; padding: 1px 5px; color: inherit; border-color: currentColor; background: transparent; text-shadow: inherit; }
+    .mobile-camera-top { gap: 12px; }
+    .mobile-camera-actions { flex: 0 0 auto; display: flex; align-items: center; gap: 16px; pointer-events: auto; }
     .camera-top-button {
       border: 0;
       padding: 4px 1px;
@@ -685,14 +688,14 @@
 </svg>
         </div>
         <div class="brand-copy">
-          <h1 class="brand-name"><span id="brandName">QRコードリーダー</span><span class="version-badge" id="versionBadge">v1.0.4</span></h1>
+          <h1 class="brand-name"><span id="brandName">QRコードリーダー</span><span class="version-badge" id="versionBadge">v1.0.5</span></h1>
           <p class="brand-meta" data-i18n="brandMeta">単一HTML・端末内処理・履歴保存</p>
         </div>
       </div>
       <div class="header-actions">
         <button class="language-button" id="languageButton" type="button" aria-label="英語に切り替え" title="英語に切り替え" data-i18n-aria-label="switchLanguage" data-i18n-title="switchLanguage">EN</button>
         <button class="header-icon-button" id="helpButton" type="button" aria-label="使い方と注意事項" data-i18n-aria-label="helpTitle" title="使い方と注意事項" data-i18n-title="helpTitle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.3 2c-1 .7-1.9 1.1-1.9 2.5M12 17h.01"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.3 2c-1 .7-1.9 1.1-1.9 2.5M12 17h.01"/></svg>
         </button>
       </div>
     </div>
@@ -723,11 +726,11 @@
           <canvas id="scanCanvas" class="hidden"></canvas>
 
           <div class="mobile-camera-top">
-            <div class="mobile-camera-title" id="mobileTitle">QRコードリーダー</div>
+            <div class="mobile-camera-title"><span id="mobileTitle">QRコードリーダー</span><span class="version-badge" id="mobileVersionBadge"></span></div>
             <div class="mobile-camera-actions">
               <button class="camera-top-button camera-language interactive" id="mobileLanguageButton" type="button" aria-label="英語に切り替え" title="英語に切り替え" data-i18n-aria-label="switchLanguage" data-i18n-title="switchLanguage">EN</button>
               <button class="camera-top-button interactive" id="mobileHelpButton" type="button" aria-label="使い方と注意事項" data-i18n-aria-label="helpTitle" title="使い方と注意事項" data-i18n-title="helpTitle">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.3 2c-1 .7-1.9 1.1-1.9 2.5M12 17h.01"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.6 2.6 0 1 1 4.3 2c-1 .7-1.9 1.1-1.9 2.5M12 17h.01"/></svg>
               </button>
             </div>
           </div>
@@ -1684,6 +1687,7 @@
 
       async function boot() {
         $('#versionBadge').textContent = `v${APP_CONFIG.version}`;
+        $('#mobileVersionBadge').textContent = `v${APP_CONFIG.version}`;
         applyLanguage();
         renderHistory();
         try { await initializeDecoder(); } catch (error) { console.error(error); showToast(t('qrEngineFailed')); }
