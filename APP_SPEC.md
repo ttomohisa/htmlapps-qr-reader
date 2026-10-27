@@ -60,3 +60,7 @@ A single-HTML QR code reader optimized for smartphones. It starts the rear camer
 The Japanese label 完全ローカル処理 uses the English text Fully local processing. Preserve the existing responsive visibility, functional bottom controls, and Help behavior. Detailed privacy/network explanations are unchanged.
 
 Help keeps its existing outer bounds; a fixed flex header and shrinking scroll body keep the final guidance reachable even when its content exceeds the desktop max-height. This repairs a pre-existing clipped Help tail without changing camera, result, history, or confirmation dialogs.
+
+## Help icon visibility
+
+Both desktop and smartphone Help question-mark icons retain a visible round bottom dot at narrow and desktop widths.

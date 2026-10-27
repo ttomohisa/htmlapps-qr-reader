@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.5 - 2026-10-27
+
+- Restore the question-mark dot in desktop and smartphone Help icons without changing their layout or controls.
+
 ## 1.0.4 - 2026-10-11
 
 - Prevent background-page scrolling while a native modal is open, preserving existing dialog geometry and close behavior.
