@@ -23,7 +23,7 @@ for (const html of variants) {
       const embedded=JSON.parse(Buffer.from(encoded,'base64'));
       const bytes=Buffer.from(embedded.dependencies.jsqr.assets.main.base64,'base64');
       assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),'bc40c8a15196236b2314db0856f72ca0b49980cd5413b8c852a7349f5fee0859');
-      const normalize=value=>value.replace(/const (APP_CONFIG|BUILD_MANIFEST|EMBEDDED_ASSET_BUNDLE_BASE64) = [^\n]+/g,'const $1 = metadata;');
+      const normalize=value=>value.replace('__BK_UI_JS__',fs.readFileSync(path.join(root,'components/ui-conventions.js'),'utf8')).replace('__BK_UI_CSS__',fs.readFileSync(path.join(root,'components/ui-conventions.css'),'utf8')).replace(/const (APP_CONFIG|BUILD_MANIFEST|EMBEDDED_ASSET_BUNDLE_BASE64) = [^\n]+/g,'const $1 = metadata;');
       assert.equal(normalize(source),normalize(fs.readFileSync(path.join(root,'src/index.template.html'),'utf8')));
     }
     assert.match(source,/connect-src 'none'/);assert.doesNotMatch(source,/navigator\.clipboard\.(?:read|readText)\s*\(/);
@@ -166,7 +166,7 @@ for (const html of variants) for (const initial of ['ja', 'en']) {
         assert.equal(badge.textContent, ja ? '完全ローカル処理' : 'Fully local processing');
         await h.node('#' + control).click();
         language = ja ? 'en' : 'ja';
-        assert.equal(h.storage.get('htmlapps-qr-reader:language'), language);
+        assert.equal(h.storage.get('browser-kitty:ui-language:v1'), language);
       }
     });
   }

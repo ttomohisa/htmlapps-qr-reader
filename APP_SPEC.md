@@ -66,3 +66,14 @@ Help keeps its existing outer bounds; a fixed flex header and shrinking scroll b
 Both desktop and smartphone Help question-mark icons retain a visible round bottom dot at narrow and desktop widths.
 
 The camera-first smartphone header shows the same configuration-derived version as the desktop header. The name may ellipsize, but the version and language/Help controls remain visible at 320px and above.
+
+
+### Shared UI conventions
+
+Camera frames, selected images and the current result stay in this tab. History alone autosaves under its existing key/schema (up to 200 entries). Its desktop/mobile status shows confirmed writes and persistent read/write failures with Retry. Unreadable JSON is preserved; ordinary scanning/retry cannot overwrite it. A confirmed Clear history can remove unreadable saved data. Failed deletion keeps the previous list and offers an exact retry; another scan invalidates an obsolete delete retry. Read recovery retains current scans and recovered stored items within the existing 200-entry limit.
+
+Copy and Share act on one captured result/history item. Native busy controls prevent duplicate requests; closed/replaced/deleted sources cannot initiate a delayed clipboard fallback or publish stale completion. Fallback cleanup always removes its textarea and restores focus only while still owned. Copy/Share, image, decoder, camera and history failures remain separately scoped and translate without restarting work.
+
+History deletion confirms the selected item/count, starts on Cancel, supports Escape/backdrop, and retains the opener on Cancel. Confirmed deletion invalidates earlier scan persistence; pending image work resumes after Cancel. Surviving search receives focus after a removed row. Result/history outer bounds remain unchanged; shrinking scroll bodies accommodate status and recovery controls. Zoom/torch choice styling stays intact; executable actions opt into shared native states and header hit areas.
+
+Language startup reads URL, common preference, existing legacy language, ordered browser languages, then English. Only an explicit switch writes the common preference; failed writes leave a visible screen-only notice. Default builds refresh both dist/index.html and qr-reader.html; custom output paths keep their scope. Native Android/iOS camera, clipboard/share, keyboard and layout acceptance remains a separate manual check.

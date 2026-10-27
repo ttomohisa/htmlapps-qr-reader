@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Integrate fixed common UI v1 actions, language selection and history retention/failure/retry adapters without changing QR decoding or stored formats.
+- Make scoped history confirmations Cancel-first, preserve failed deletions, and prevent earlier scan/native completions from acting on deleted or replaced work.
+- Keep independent localized recovery for image/decoder/camera/history/copy/share, with owned clipboard cleanup and real duplicate guards.
+- Validate complete strict-ID initialization, production decoder behavior and the same application regressions in both shipped HTML copies.
+
 ## 1.0.5 - 2026-10-27
 
 - Restore the question-mark dot in desktop and smartphone Help icons without changing their layout or controls.

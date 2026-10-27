@@ -36,7 +36,7 @@ test('scanner/reception root locks remain unchanged and non-modal dialogs add no
   assert.deepEqual(existingLocks, [["html", "width:100%;height:100%;overflow:hidden;background:#0b0e0d;overscroll-behavior:none;"], ["body", "width:100%;height:100%;overflow:hidden;background:#0b0e0d;overscroll-behavior:none;"]], 'Preserve existing mobile/reception locks without adding [open] or unconditional locks');
 });
 
-test('dialog geometry preserves all other dialogs and bounds the Help body', () => {
+test('dialog outer geometry stays fixed while Help/result/history bodies shrink to their scroll area', () => {
   const geometry = rules.filter(rule => /dialog|#helpDialog|\.(?:result-body|confirm-body|confirm-actions)\b/.test(rule.selector) && !rule.selector.includes(':has(dialog:modal)'))
     .map(rule => [compact(rule.selector), compact(rule.body)]);
   assert.deepEqual(geometry, [
@@ -115,6 +115,8 @@ test('dialog geometry preserves all other dialogs and bounds the Help body', () 
     ".result-body",
     "padding:19px;overflow:auto;max-height:calc(100dvh-86px);"
   ],
+  ["#resultDialog.dialog-header,#historyDialog.dialog-header", "flex:00auto;"],
+  ["#resultDialog.result-body,#historyDialog.history-dialog-body", "flex:11auto;min-height:0;max-height:none;overflow:auto;"],
   [
     ".confirm-dialog",
     "width:min(420px,calc(100%-24px));max-width:100%;overflow:hidden;"

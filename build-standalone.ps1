@@ -72,7 +72,8 @@ if (-not (Get-Command tar.exe -ErrorAction SilentlyContinue)) { throw "tar.exe w
 New-Item -ItemType Directory -Force -Path $CacheRoot, $DistRoot | Out-Null
 $app = Get-Json $AppConfigPath
 $depsConfig = Get-Json $DependenciesPath
-if ([string]::IsNullOrWhiteSpace($OutputPath)) { $OutputPath = Join-Path $Root ([string]$app.build.output) }
+$RefreshRootAlias = [string]::IsNullOrWhiteSpace($OutputPath)
+if ($RefreshRootAlias) { $OutputPath = Join-Path $Root ([string]$app.build.output) }
 elseif (-not [IO.Path]::IsPathRooted($OutputPath)) { $OutputPath = Join-Path $Root $OutputPath }
 
 $bundle = [ordered]@{ schemaVersion = 1; dependencies = [ordered]@{} }
@@ -125,6 +126,8 @@ $manifest = [ordered]@{
 
 Write-Step "Generating standalone HTML"
 $template = [IO.File]::ReadAllText($TemplatePath, [Text.Encoding]::UTF8)
+. (Join-Path $Root "scripts/embed-ui-conventions.ps1")
+$template = Expand-BrowserKittyUI -Template $template -ComponentsPath (Join-Path $Root "components")
 $bundleJson = Safe-Json $bundle 50
 $replacements = [ordered]@{
   '__APP_CONFIG_JSON__' = Safe-Json $app 20
@@ -141,6 +144,7 @@ New-Item -ItemType Directory -Force -Path $directory | Out-Null
 [IO.File]::WriteAllText($OutputPath, $template, (New-Object System.Text.UTF8Encoding($false)))
 [IO.File]::WriteAllText((Join-Path $directory 'dependency-manifest.json'), ($manifest | ConvertTo-Json -Depth 40), (New-Object System.Text.UTF8Encoding($false)))
 [IO.File]::WriteAllText((Join-Path $directory '.nojekyll'), '', (New-Object System.Text.UTF8Encoding($false)))
+if ($RefreshRootAlias) { [IO.File]::WriteAllText((Join-Path $Root "qr-reader.html"), $template, (New-Object System.Text.UTF8Encoding($false))) }
 & $VerifyPath -Path $OutputPath -RequireNetworkBlock ([bool]$app.build.blockRuntimeNetwork)
 $hash = (Get-FileHash -Algorithm SHA256 $OutputPath).Hash.ToLowerInvariant()
 $sizeMb = [Math]::Round((Get-Item $OutputPath).Length / 1MB, 2)
