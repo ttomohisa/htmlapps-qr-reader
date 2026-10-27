@@ -64,3 +64,5 @@ Help keeps its existing outer bounds; a fixed flex header and shrinking scroll b
 ## Help icon visibility
 
 Both desktop and smartphone Help question-mark icons retain a visible round bottom dot at narrow and desktop widths.
+
+The camera-first smartphone header shows the same configuration-derived version as the desktop header. The name may ellipsize, but the version and language/Help controls remain visible at 320px and above.

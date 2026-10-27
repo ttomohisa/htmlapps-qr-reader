@@ -16,7 +16,7 @@ function makePlan({ sourceOnly = false, env = process.env } = {}) {
   if (sourceOnly) return plan;
   const config = JSON.parse(fs.readFileSync(path.join(root, 'app.config.json'), 'utf8'));
   const artifacts = [...new Set([config.build.output, 'qr-reader.html'])];
-  const runtimeTests = ['qr-reader.test.cjs', 'icon-brand.test.cjs', 'modal-scroll.test.cjs', 'help-icon.test.cjs'].map(testPath);
+  const runtimeTests = ['qr-reader.test.cjs', 'icon-brand.test.cjs', 'modal-scroll.test.cjs', 'help-icon.test.cjs', 'header-version.test.cjs'].map(testPath);
   for (const artifact of artifacts) {
     plan.push(step(`${artifact}: application regressions`, ['--test', ...runtimeTests], artifact));
 

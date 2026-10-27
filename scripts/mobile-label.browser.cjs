@@ -18,6 +18,10 @@ async function main(){
  const langButton=width<=760&&cfg.phoneLanguage?cfg.phoneLanguage:cfg.language;
  await page.locator(langButton).waitFor();
  if(await page.locator('html').getAttribute('lang')!==language)await page.locator(langButton).click();
+ const headerVersion=page.locator(width<=760?'#mobileVersionBadge':'#versionBadge');
+ assert.equal(await headerVersion.isVisible(),true,label+': header version is visible');
+ assert.equal((await headerVersion.textContent()).trim(),'v'+JSON.parse(fs.readFileSync(path.resolve(__dirname,'../app.config.json'),'utf8')).version,label+': current version');
+ assert.ok(await headerVersion.evaluate(el=>{const r=el.getBoundingClientRect();if(r.left<0||r.right>innerWidth||el.scrollWidth>el.clientWidth+1)return false;for(let p=el.parentElement;p;p=p.parentElement){if(/hidden|clip/.test(getComputedStyle(p).overflowX)){const b=p.getBoundingClientRect();if(r.left<b.left-1||r.right>b.right+1)return false;}}return true;}),label+': version is not clipped');
  const badge=page.locator(cfg.badge);
  assert.equal((await badge.textContent()).trim(),language==='ja'?'完全ローカル処理':'Fully local processing');
  assert.equal(await badge.isVisible(),width>cfg.hide,label+': existing badge visibility');

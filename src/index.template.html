@@ -211,8 +211,11 @@
       padding: calc(env(safe-area-inset-top) + 12px) 16px 10px;
       pointer-events: none;
     }
-    .mobile-camera-title { font-size: 16px; font-weight: 760; letter-spacing: -.01em; text-shadow: 0 1px 12px rgba(0,0,0,.55); }
-    .mobile-camera-actions { display: flex; align-items: center; gap: 16px; pointer-events: auto; }
+    .mobile-camera-title { min-width: 0; display: flex; align-items: center; font-size: 16px; font-weight: 760; letter-spacing: -.01em; text-shadow: 0 1px 12px rgba(0,0,0,.55); }
+    #mobileTitle { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mobile-camera-title .version-badge { flex: 0 0 auto; margin-left: 5px; padding: 1px 5px; color: inherit; border-color: currentColor; background: transparent; text-shadow: inherit; }
+    .mobile-camera-top { gap: 12px; }
+    .mobile-camera-actions { flex: 0 0 auto; display: flex; align-items: center; gap: 16px; pointer-events: auto; }
     .camera-top-button {
       border: 0;
       padding: 4px 1px;
@@ -723,7 +726,7 @@
           <canvas id="scanCanvas" class="hidden"></canvas>
 
           <div class="mobile-camera-top">
-            <div class="mobile-camera-title" id="mobileTitle">QRコードリーダー</div>
+            <div class="mobile-camera-title"><span id="mobileTitle">QRコードリーダー</span><span class="version-badge" id="mobileVersionBadge"></span></div>
             <div class="mobile-camera-actions">
               <button class="camera-top-button camera-language interactive" id="mobileLanguageButton" type="button" aria-label="英語に切り替え" title="英語に切り替え" data-i18n-aria-label="switchLanguage" data-i18n-title="switchLanguage">EN</button>
               <button class="camera-top-button interactive" id="mobileHelpButton" type="button" aria-label="使い方と注意事項" data-i18n-aria-label="helpTitle" title="使い方と注意事項" data-i18n-title="helpTitle">
@@ -1684,6 +1687,7 @@
 
       async function boot() {
         $('#versionBadge').textContent = `v${APP_CONFIG.version}`;
+        $('#mobileVersionBadge').textContent = `v${APP_CONFIG.version}`;
         applyLanguage();
         renderHistory();
         try { await initializeDecoder(); } catch (error) { console.error(error); showToast(t('qrEngineFailed')); }
